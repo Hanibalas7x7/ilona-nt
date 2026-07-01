@@ -644,14 +644,21 @@ document.getElementById('propForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const err = document.getElementById('formError');
 
-  const title = document.getElementById('fieldTitle').value.trim();
-  const price = document.getElementById('fieldPrice').value.trim();
-  const area  = document.getElementById('fieldArea').value.trim();
+  const title   = document.getElementById('fieldTitle').value.trim();
+  const isRent  = document.getElementById('fieldType').value === 'nuomoti';
+  const rawPrice = document.getElementById('fieldPrice').value.trim();
+  const area    = document.getElementById('fieldArea').value.trim();
 
-  if (!title) { showError(err, 'Pavadinimas privalomas.'); return; }
-  if (!price) { showError(err, 'Kaina privaloma.'); return; }
-  if (!area)  { showError(err, 'Plotas privalomas.'); return; }
+  if (!title)    { showError(err, 'Pavadinimas privalomas.'); return; }
+  if (!rawPrice) { showError(err, 'Kaina privaloma.'); return; }
+  if (!area)     { showError(err, 'Plotas privalomas.'); return; }
   hideError(err);
+
+  // Normalizuojame kainą: pridedame € ir /mėn. jei trūksta
+  const priceNum = parseEurAmount(rawPrice);
+  const price = priceNum
+    ? formatEur(priceNum) + (isRent ? '/mėn.' : '')
+    : rawPrice; // jei neišparsavo – paliekame kaip yra
 
   const images = formImages.map(i => i.url).filter(Boolean);
 
