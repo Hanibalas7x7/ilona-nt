@@ -112,11 +112,7 @@ function isLoggedIn() {
 
 // Gauna slaptažodžio hash iš GitHub – tik jei žinome, kad jis ten yra
 async function fetchHashFromGitHub() {
-  // Bandome gauti hash kai: a) žinome kad jis yra GitHub, arba b) localStorage tuščias (naujas įrenginys)
-  const flagSet = !!localStorage.getItem(HASH_ON_GH_KEY);
-  const localEmpty = !localStorage.getItem(PASS_KEY);
-  if (!flagSet && !localEmpty) return null;
-
+  // Visada bandome – sinchronizuojame hash tarp visų įrenginių
   const cfg = S.ghConfig;
   const owner  = cfg.owner  || DEFAULT_GH_OWNER;
   const repo   = cfg.repo   || DEFAULT_GH_REPO;
@@ -163,10 +159,11 @@ async function saveHashToGitHub(hash) {
 }
 
 async function showLoginScreen() {
-  // GitHub hash naudojamas TIK jei localStorage tuščias (naujas įrenginys)
-  if (!localStorage.getItem(PASS_KEY)) {
-    const ghHash = await fetchHashFromGitHub();
-    if (ghHash) localStorage.setItem(PASS_KEY, ghHash);
+  // Visada sinchronizuojame hash iš GitHub (veikia tarp visų įrenginių)
+  const ghHash = await fetchHashFromGitHub();
+  if (ghHash) {
+    localStorage.setItem(PASS_KEY, ghHash);
+    localStorage.setItem(HASH_ON_GH_KEY, '1');
   }
 
   const hasHash = !!localStorage.getItem(PASS_KEY);
