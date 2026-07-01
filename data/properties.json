@@ -322,29 +322,5 @@
       "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=900&q=80",
       "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=900&q=80"
     ]
-  },
-  {
-    "id": 13,
-    "status": "active",
-    "type": "nuomoti",
-    "category": "butas",
-    "title": "Pigus Nuomai",
-    "address": "Savanoriu g. 255",
-    "location": "Kaunas",
-    "price": "400 €",
-    "pricePerSqm": "11 €/m²",
-    "area": "35",
-    "rooms": "2",
-    "floor": "1/3",
-    "year": "2010",
-    "heating": "Dujinis",
-    "energy": "A++",
-    "condition": "Tvarkingas",
-    "equipment": "Pilnas įrengimas",
-    "desc": "Galima nuomoti",
-    "new": true,
-    "images": [
-      "images/obj13/1.jpg"
-    ]
   }
 ]
