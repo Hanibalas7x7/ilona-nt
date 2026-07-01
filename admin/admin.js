@@ -10,6 +10,11 @@ const PASS_KEY          = 'ntilona_admin_hash';
 const GH_KEY            = 'ntilona_gh_config';
 const LOCAL_KEY         = 'ntilona_properties_draft';
 const PENDING_KEY       = 'ntilona_pending_reviews';
+const HASH_GH_PATH      = 'admin/.pwdhash';          // slaptažodžio hash GitHub repozitorijoje
+
+// ── Sąrankos kodas ───────────────────────────────────────────────────────────
+// Pakeiskite į savo slaptą kodą! Jis reikalingas pirmą kartą nustatant slaptažodį.
+const SETUP_CODE        = 'IlonaNT-2026!';           // ← PAKEISKITE
 
 // ── State ───────────────────────────────────────────────────────────────────
 
@@ -103,7 +108,54 @@ function isLoggedIn() {
   return sessionStorage.getItem('ntilona_session') === '1';
 }
 
-function showLoginScreen() {
+// Gauna slaptažodžio hash iš GitHub (public repo, be tokeno)
+async function fetchHashFromGitHub() {
+  const cfg = S.ghConfig;
+  if (!cfg.owner || !cfg.repo) return null;
+  try {
+    const branch = cfg.branch || 'main';
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${branch}/${HASH_GH_PATH}`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return null;
+    const text = (await res.text()).trim();
+    return text.includes(':') ? text : null;
+  } catch { return null; }
+}
+
+// Išsaugo hash į GitHub
+async function saveHashToGitHub(hash) {
+  const { owner, repo, branch, token } = S.ghConfig;
+  if (!owner || !repo || !token) return;
+  try {
+    let sha;
+    const check = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${HASH_GH_PATH}`,
+      { headers: ghHeaders() }
+    );
+    if (check.ok) sha = (await check.json()).sha;
+    await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${HASH_GH_PATH}`,
+      {
+        method: 'PUT',
+        headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Admin: atnaujintas slaptažodis',
+          content: btoa(hash),
+          branch: branch || 'main',
+          ...(sha ? { sha } : {}),
+        }),
+      }
+    );
+  } catch { /* nekritinė klaida – hash jau yra localStorage */ }
+}
+
+async function showLoginScreen() {
+  // Bandome gauti hash iš GitHub (jei sukonfigūruota)
+  const ghHash = await fetchHashFromGitHub();
+  if (ghHash) localStorage.setItem(PASS_KEY, ghHash);
+
   const hasHash = !!localStorage.getItem(PASS_KEY);
   document.getElementById('setupForm').classList.toggle('hidden', hasHash);
   document.getElementById('loginForm').classList.toggle('hidden', !hasHash);
@@ -111,15 +163,20 @@ function showLoginScreen() {
 
 document.getElementById('setupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const p1 = document.getElementById('setupPass').value;
-  const p2 = document.getElementById('setupPass2').value;
-  const err = document.getElementById('setupError');
-  if (p1 !== p2) { showError(err, 'Slaptažodžiai nesutampa.'); return; }
-  if (p1.length < 6) { showError(err, 'Slaptažodis per trumpas (min. 6 simboliai).'); return; }
-  localStorage.setItem(PASS_KEY, await hashPassword(p1));
+  const code = document.getElementById('setupCode').value;
+  const p1   = document.getElementById('setupPass').value;
+  const p2   = document.getElementById('setupPass2').value;
+  const err  = document.getElementById('setupError');
+  if (code !== SETUP_CODE) { showError(err, 'Neteisingas sąrankos kodas.'); return; }
+  if (p1 !== p2)           { showError(err, 'Slaptažodžiai nesutampa.'); return; }
+  if (p1.length < 6)       { showError(err, 'Slaptažodis per trumpas (min. 6 simboliai).'); return; }
+  const hash = await hashPassword(p1);
+  localStorage.setItem(PASS_KEY, hash);
   sessionStorage.setItem('ntilona_session', '1');
   hideError(err);
   await enterAdmin();
+  // Išsaugome hash į GitHub fone (jei sukonfigūruota)
+  saveHashToGitHub(hash);
 });
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -809,7 +866,9 @@ document.getElementById('btnChangePass').addEventListener('click', async () => {
   if (newPass.length < 6)   { showError(msg, 'Naujas slaptažodis per trumpas (min. 6).'); return; }
   const stored = localStorage.getItem(PASS_KEY);
   if (!(await verifyPassword(oldPass, stored))) { showError(msg, 'Dabartinis slaptažodis neteisingas.'); return; }
-  localStorage.setItem(PASS_KEY, await hashPassword(newPass));
+  const newHash = await hashPassword(newPass);
+  localStorage.setItem(PASS_KEY, newHash);
+  saveHashToGitHub(newHash);
   msg.textContent = '✅ Slaptažodis pakeistas.';
   msg.classList.remove('hidden');
   msg.style.color = 'var(--clr-success)';
@@ -1052,10 +1111,14 @@ dropZone.addEventListener('drop', e => {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
+  // Įkeliame GitHub config anksčiau, kad showLoginScreen galėtų fetch hash
+  const storedCfg = localStorage.getItem(GH_KEY);
+  if (storedCfg) S.ghConfig = { ...S.ghConfig, ...JSON.parse(storedCfg) };
+
   if (isLoggedIn()) {
     await enterAdmin();
   } else {
-    showLoginScreen();
+    await showLoginScreen();
   }
 }
 

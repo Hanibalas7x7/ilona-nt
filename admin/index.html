@@ -18,7 +18,11 @@
 
       <!-- Naujo slaptažodžio nustatymas (pirmas kartas) -->
       <form id="setupForm" class="auth-form hidden">
-        <p class="setup-hint">Pirmas prisijungimas. Nustatykite administracijos slaptažodį.</p>
+        <p class="setup-hint">Pirmas prisijungimas. Įveskite sąrankos kodą ir nustatykite slaptažodį.</p>
+        <div class="field-group">
+          <label for="setupCode">Sąrankos kodas</label>
+          <input type="password" id="setupCode" required autocomplete="off" placeholder="Sąrankos kodas" />
+        </div>
         <div class="field-group">
           <label for="setupPass">Naujas slaptažodis</label>
           <input type="password" id="setupPass" minlength="6" required autocomplete="new-password" />
