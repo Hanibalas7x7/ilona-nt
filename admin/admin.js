@@ -37,6 +37,8 @@ function formatEur(n) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + ' \u20ac';
 }
 function autoCalcPriceSqm() {
+  const isRent = document.getElementById('fieldType').value === 'nuomoti';
+  if (isRent) { document.getElementById('fieldPriceSqm').value = ''; return; }
   const price = parseEurAmount(document.getElementById('fieldPrice').value);
   const areaStr = (document.getElementById('fieldArea').value || '').replace(',', '.');
   const area  = parseFloat(areaStr.replace(/[^\d.]/g, ''));
@@ -614,11 +616,24 @@ function openForm(id = null) {
   // Price field auto-format (run once per form open to avoid duplicate listeners)
   const fp = document.getElementById('fieldPrice');
   const fa = document.getElementById('fieldArea');
+  const ft = document.getElementById('fieldType');
   fp.onblur = function() {
     const n = parseEurAmount(this.value);
-    if (n) { this.value = formatEur(n); autoCalcPriceSqm(); }
+    if (n) {
+      const isRent = ft.value === 'nuomoti';
+      this.value = formatEur(n) + (isRent ? '/mėn.' : '');
+      autoCalcPriceSqm();
+    }
   };
   fa.onblur = autoCalcPriceSqm;
+  ft.onchange = function() {
+    // Re-format price suffix when switching between sale/rental
+    const n = parseEurAmount(fp.value);
+    if (n) {
+      fp.value = formatEur(n) + (this.value === 'nuomoti' ? '/mėn.' : '');
+    }
+    autoCalcPriceSqm();
+  };
 }
 
 document.getElementById('btnAdd').addEventListener('click', () => openForm(null));
