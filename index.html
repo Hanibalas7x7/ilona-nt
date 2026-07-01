@@ -433,6 +433,7 @@
 
   <script src="js/main.js"></script>
   <script>
+    // Kontaktai
     fetch('./data/contact.json?v=' + Date.now())
       .then(r => r.json())
       .then(c => {
@@ -446,6 +447,37 @@
           const el = document.getElementById(id);
           if (el) { el.href = scheme + href; el.textContent = text; }
         });
+      })
+      .catch(() => {});
+    // Apie mane
+    fetch('./data/about.json?v=' + Date.now())
+      .then(r => r.json())
+      .then(a => {
+        const titleEl = document.getElementById('aboutSectionTitle');
+        const textsEl = document.getElementById('aboutTexts');
+        const listEl  = document.getElementById('aboutList');
+        const badgeEl = document.getElementById('aboutBadgeNum');
+        const photoEl = document.getElementById('aboutPhoto');
+        const placEl  = document.getElementById('aboutPlaceholder');
+        if (titleEl && a.title) titleEl.textContent = a.title;
+        if (textsEl && a.text) {
+          textsEl.innerHTML = a.text.split('\n\n')
+            .filter(p => p.trim())
+            .map(p => `<p class="about__text">${p.trim()}</p>`)
+            .join('');
+        }
+        if (listEl && a.bullets) {
+          listEl.innerHTML = a.bullets.split('\n')
+            .filter(b => b.trim())
+            .map(b => `<li>${b.trim()}</li>`)
+            .join('');
+        }
+        if (badgeEl && a.badge) badgeEl.textContent = a.badge;
+        if (a.photo && photoEl) {
+          photoEl.src = a.photo;
+          photoEl.style.display = '';
+          if (placEl) placEl.style.display = 'none';
+        }
       })
       .catch(() => {});
   </script>

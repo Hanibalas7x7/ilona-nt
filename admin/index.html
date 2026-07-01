@@ -141,7 +141,41 @@
       <div class="settings-page">
 
         <div class="settings-card">
-          <h3 class="settings-card__title">📞 Kontaktinė informacija</h3>
+          <h3 class="settings-card__title">� Apie mane</h3>
+          <p class="hint">Tekstas ir nuotrauka, rodomi „Apie mane" sekcijoje svetainėje.</p>
+          <div class="field-row">
+            <div class="field-group">
+              <label for="aboutTitle">Antraštė</label>
+              <input type="text" id="aboutTitle" placeholder="Sveiki, aš – Ilona" autocomplete="off" />
+            </div>
+            <div class="field-group">
+              <label for="aboutBadge">Patirties ženkliukas (pvz. 12+)</label>
+              <input type="text" id="aboutBadge" placeholder="12+" autocomplete="off" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label for="aboutText">Tekstas <small style="color:var(--clr-muted)">(pastraipos atskirkite tuščia eilute)</small></label>
+            <textarea id="aboutText" rows="5" placeholder="Pirma pastraipa...&#10;&#10;Antra pastraipa..."></textarea>
+          </div>
+          <div class="field-group">
+            <label for="aboutBullets">Sąrašas <small style="color:var(--clr-muted)">(kiekvienas punktas – nauja eilutė)</small></label>
+            <textarea id="aboutBullets" rows="4" placeholder="✔ Pirmas punktas&#10;✔ Antras punktas"></textarea>
+          </div>
+          <div class="field-group">
+            <label>Nuotrauka</label>
+            <div class="about-photo-row">
+              <img id="aboutPhotoPreview" class="about-photo-preview" src="" alt="" style="display:none" />
+              <div>
+                <input type="file" id="aboutPhotoInput" accept="image/*" hidden />
+                <button type="button" class="btn btn-outline" id="btnPickAboutPhoto">📷 Įkelti nuotrauką</button>
+                <span id="aboutPhotoStatus" class="upload-hint" style="display:block;margin-top:4px"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card__title">�📞 Kontaktinė informacija</h3>
           <p class="hint">Rodoma svetainės kontaktų skyriuje ir porštėje. Išsaugojus atnaujinama GitHub.</p>
           <div class="field-row">
             <div class="field-group">

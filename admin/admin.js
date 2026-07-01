@@ -18,6 +18,8 @@ const DEFAULT_GH_OWNER  = 'Hanibalas7x7';
 const DEFAULT_GH_REPO   = 'ilona-nt';
 const DEFAULT_GH_BRANCH = 'main';
 const CONTACT_PATH      = 'data/contact.json';
+const ABOUT_PATH        = 'data/about.json';
+const ABOUT_PHOTO_PATH  = 'images/about.jpg';
 
 // ── State ───────────────────────────────────────────────────────────────────
 
@@ -31,6 +33,7 @@ const S = {
   testimonials: [],
   reviewsSha: null,
   contact: null,
+  about: null,
 };
 
 // Image manager state
@@ -948,18 +951,33 @@ function loadSettingsSection() {
   hideError(document.getElementById('settingsError'));
   document.getElementById('settingsStatusMsg').classList.add('hidden');
 
+  // Kontaktai
   if (S.contact) {
     document.getElementById('setPhone').value = S.contact.phone || '';
     document.getElementById('setEmail').value = S.contact.email || '';
   } else {
     fetch('../data/contact.json?v=' + Date.now())
       .then(r => r.json())
-      .then(c => {
-        S.contact = c;
-        document.getElementById('setPhone').value = c.phone || '';
-        document.getElementById('setEmail').value = c.email || '';
-      })
+      .then(c => { S.contact = c; document.getElementById('setPhone').value = c.phone || ''; document.getElementById('setEmail').value = c.email || ''; })
       .catch(() => {});
+  }
+
+  // Apie mane
+  const loadAbout = (a) => {
+    S.about = a;
+    document.getElementById('aboutTitle').value   = a.title   || '';
+    document.getElementById('aboutText').value    = a.text    || '';
+    document.getElementById('aboutBullets').value = a.bullets || '';
+    document.getElementById('aboutBadge').value   = a.badge   || '';
+    if (a.photo) {
+      const prev = document.getElementById('aboutPhotoPreview');
+      prev.src = a.photo; prev.style.display = '';
+    }
+  };
+  if (S.about) { loadAbout(S.about); }
+  else {
+    fetch('../data/about.json?v=' + Date.now())
+      .then(r => r.json()).then(loadAbout).catch(() => {});
   }
 }
 
@@ -988,6 +1006,100 @@ async function saveContactToGitHub(contact) {
   if (!putRes.ok) { const e = await putRes.json(); throw new Error(e.message || putRes.statusText); }
 }
 
+async function saveAboutToGitHub(about) {
+  const { owner, repo } = S.ghConfig;
+  const branch = S.ghConfig.branch || 'main';
+  let sha;
+  try {
+    const getRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${ABOUT_PATH}?ref=${branch}`,
+      { headers: ghHeaders() }
+    );
+    if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+  } catch { /* new file */ }
+
+  const body = {
+    message: 'Admin: atnaujinta "Apie mane"',
+    content: toBase64(JSON.stringify(about, null, 2)),
+    branch,
+    ...(sha ? { sha } : {}),
+  };
+  const putRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${ABOUT_PATH}`,
+    { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!putRes.ok) { const e = await putRes.json(); throw new Error(e.message || putRes.statusText); }
+}
+
+async function uploadAboutPhoto(file) {
+  const status = document.getElementById('aboutPhotoStatus');
+  const preview = document.getElementById('aboutPhotoPreview');
+  status.textContent = '⏳ Įkeliama...';
+
+  // Compress with canvas
+  const img = await new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => { const i = new Image(); i.onload = () => res(i); i.src = e.target.result; };
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+  const canvas = document.createElement('canvas');
+  const MAX = 800;
+  const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+  const base64 = dataUrl.split(',')[1];
+
+  const { owner, repo } = S.ghConfig;
+  const branch = S.ghConfig.branch || 'main';
+
+  if (!owner || !repo || !S.ghConfig.token) {
+    // Preview only, save URL later
+    preview.src = dataUrl; preview.style.display = '';
+    if (!S.about) S.about = {};
+    S.about.photo = dataUrl;
+    status.textContent = '⚠️ GitHub nekonfigūruotas – nuotrauka išsaugota laikinai.';
+    return;
+  }
+
+  // Check existing SHA
+  let sha;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${ABOUT_PHOTO_PATH}?ref=${branch}`, { headers: ghHeaders() });
+    if (r.ok) { const d = await r.json(); sha = d.sha; }
+  } catch { /* new file */ }
+
+  const body = {
+    message: 'Admin: apie nuotrauka',
+    content: base64,
+    branch,
+    ...(sha ? { sha } : {}),
+  };
+  const putRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${ABOUT_PHOTO_PATH}`,
+    { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!putRes.ok) { const e = await putRes.json(); throw new Error(e.message || putRes.statusText); }
+
+  // Use GitHub Pages URL
+  const photoUrl = `https://${owner}.github.io/${repo}/${ABOUT_PHOTO_PATH}`;
+  preview.src = dataUrl; preview.style.display = '';
+  if (!S.about) S.about = {};
+  S.about.photo = photoUrl;
+  status.textContent = '✅ Nuotrauka įkelta į GitHub.';
+}
+
+document.getElementById('btnPickAboutPhoto').addEventListener('click', () => {
+  document.getElementById('aboutPhotoInput').click();
+});
+document.getElementById('aboutPhotoInput').addEventListener('change', async function () {
+  if (!this.files[0]) return;
+  try { await uploadAboutPhoto(this.files[0]); }
+  catch (e) { document.getElementById('aboutPhotoStatus').textContent = '❌ ' + e.message; }
+});
+
 document.getElementById('btnSettings').addEventListener('click', () => {
   document.getElementById('navSettings').click();
 });
@@ -1001,8 +1113,9 @@ document.getElementById('settingsSaveBtn').addEventListener('click', async () =>
   };
   localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
 
-  const phone = document.getElementById('setPhone').value.trim();
-  const email = document.getElementById('setEmail').value.trim();
+  const phone      = document.getElementById('setPhone').value.trim();
+  const email      = document.getElementById('setEmail').value.trim();
+  const aboutTitle = document.getElementById('aboutTitle').value.trim();
   const msg   = document.getElementById('settingsStatusMsg');
   const btn   = document.getElementById('settingsSaveBtn');
 
@@ -1014,14 +1127,25 @@ document.getElementById('settingsSaveBtn').addEventListener('click', async () =>
     msg._t = setTimeout(() => msg.classList.add('hidden'), 5000);
   };
 
-  if (phone && email && S.ghConfig.owner && S.ghConfig.token) {
+  if ((phone || email || aboutTitle) && S.ghConfig.owner && S.ghConfig.token) {
     const contact = { phone, phoneRaw: phone.replace(/\s/g, ''), email };
+    const about   = {
+      title:   aboutTitle,
+      text:    document.getElementById('aboutText').value.trim(),
+      bullets: document.getElementById('aboutBullets').value.trim(),
+      badge:   document.getElementById('aboutBadge').value.trim(),
+      photo:   S.about?.photo || '',
+    };
     S.contact = contact;
+    S.about   = about;
     btn.disabled = true;
     btn.textContent = '⏳ Saugoma...';
     try {
-      await saveContactToGitHub(contact);
-      showMsg('✅ Nustatymai išsaugoti ir kontaktai atnaujinti GitHub.', 'success');
+      await Promise.all([
+        saveContactToGitHub(contact),
+        saveAboutToGitHub(about),
+      ]);
+      showMsg('✅ Nustatymai išsaugoti ir atnaujinti GitHub.', 'success');
     } catch (e) {
       showMsg('❌ GitHub klaida: ' + e.message, 'error');
     } finally {
