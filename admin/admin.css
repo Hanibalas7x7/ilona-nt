@@ -556,6 +556,41 @@ body {
   .prop-cards { display: block; }
 }
 
+/* ── Settings page ── */
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+}
+
+.settings-card {
+  background: var(--clr-white);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  box-shadow: var(--shadow);
+}
+
+.settings-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--clr-text);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 700px) {
+  .settings-actions { flex-direction: column; align-items: stretch; }
+  .settings-actions .btn { width: 100%; justify-content: center; }
+}
+
 /* ── Image manager ── */
 .img-manager {
   border: 1.5px solid var(--clr-border);

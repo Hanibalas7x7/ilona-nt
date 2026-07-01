@@ -262,14 +262,14 @@
               <span class="contact__icon" aria-hidden="true">📞</span>
               <div>
                 <strong>Telefonas</strong>
-                <a href="tel:+37060000000">+370 600 00 000</a>
+                <a href="tel:+37060000000" id="contactPhoneLink">+370 600 00 000</a>
               </div>
             </div>
             <div class="contact__item">
               <span class="contact__icon" aria-hidden="true">✉️</span>
               <div>
                 <strong>El. paštas</strong>
-                <a href="mailto:ilona@ntilona.lt">ilona@ntilona.lt</a>
+                <a href="mailto:ilona@ntilona.lt" id="contactEmailLink">ilona@ntilona.lt</a>
               </div>
             </div>
             <div class="contact__item">
@@ -374,8 +374,8 @@
       </div>
       <div class="footer__contact">
         <h4>Kontaktai</h4>
-        <p><a href="tel:+37060000000">+370 600 00 000</a></p>
-        <p><a href="mailto:ilona@ntilona.lt">ilona@ntilona.lt</a></p>
+        <p><a href="tel:+37060000000" id="footerPhoneLink">+370 600 00 000</a></p>
+        <p><a href="mailto:ilona@ntilona.lt" id="footerEmailLink">ilona@ntilona.lt</a></p>
         <p>Vilnius, Lietuva</p>
       </div>
     </div>
@@ -432,5 +432,21 @@
   </div>
 
   <script src="js/main.js"></script>
-</body>
+  <script>
+    fetch('./data/contact.json?v=' + Date.now())
+      .then(r => r.json())
+      .then(c => {
+        const ids = {
+          contactPhoneLink: ['tel:', c.phoneRaw, c.phone],
+          footerPhoneLink:  ['tel:', c.phoneRaw, c.phone],
+          contactEmailLink: ['mailto:', c.email, c.email],
+          footerEmailLink:  ['mailto:', c.email, c.email],
+        };
+        Object.entries(ids).forEach(([id, [scheme, href, text]]) => {
+          const el = document.getElementById(id);
+          if (el) { el.href = scheme + href; el.textContent = text; }
+        });
+      })
+      .catch(() => {});
+  </script>
 </html>

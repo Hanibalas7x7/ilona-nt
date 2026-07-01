@@ -17,6 +17,7 @@ const HASH_ON_GH_KEY    = 'ntilona_hash_on_gh';
 const DEFAULT_GH_OWNER  = 'Hanibalas7x7';
 const DEFAULT_GH_REPO   = 'ilona-nt';
 const DEFAULT_GH_BRANCH = 'main';
+const CONTACT_PATH      = 'data/contact.json';
 
 // ── State ───────────────────────────────────────────────────────────────────
 
@@ -29,6 +30,7 @@ const S = {
   fileSha: null,
   testimonials: [],
   reviewsSha: null,
+  contact: null,
 };
 
 // Image manager state
@@ -567,6 +569,8 @@ function initSectionNav() {
       const section = btn.dataset.section;
       document.getElementById('sectionProps').classList.toggle('hidden',    section !== 'props');
       document.getElementById('sectionReviews').classList.toggle('hidden',  section !== 'reviews');
+      document.getElementById('sectionSettings').classList.toggle('hidden', section !== 'settings');
+      if (section === 'settings') loadSettingsSection();
     });
   });
 }
@@ -930,40 +934,104 @@ function confirmDelete(id) {
   btnNo.addEventListener('click',  onNo,  { once: true });
 }
 
-// ── Settings ──────────────────────────────────────────────────────────────────
+// ── Settings ────────────────────────────────────────────────────────────────
+
+function loadSettingsSection() {
+  document.getElementById('ghOwner').value  = S.ghConfig.owner  || '';
+  document.getElementById('ghRepo').value   = S.ghConfig.repo   || '';
+  document.getElementById('ghBranch').value = S.ghConfig.branch || 'main';
+  document.getElementById('ghToken').value  = S.ghConfig.token  || '';
+  document.getElementById('chgPassOld').value  = '';
+  document.getElementById('chgPassNew').value  = '';
+  document.getElementById('chgPassNew2').value = '';
+  hideError(document.getElementById('chgPassMsg'));
+  hideError(document.getElementById('settingsError'));
+  document.getElementById('settingsStatusMsg').classList.add('hidden');
+
+  if (S.contact) {
+    document.getElementById('setPhone').value = S.contact.phone || '';
+    document.getElementById('setEmail').value = S.contact.email || '';
+  } else {
+    fetch('../data/contact.json?v=' + Date.now())
+      .then(r => r.json())
+      .then(c => {
+        S.contact = c;
+        document.getElementById('setPhone').value = c.phone || '';
+        document.getElementById('setEmail').value = c.email || '';
+      })
+      .catch(() => {});
+  }
+}
+
+async function saveContactToGitHub(contact) {
+  const { owner, repo, token } = S.ghConfig;
+  const branch = S.ghConfig.branch || 'main';
+  let sha;
+  try {
+    const getRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${CONTACT_PATH}?ref=${branch}`,
+      { headers: ghHeaders() }
+    );
+    if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+  } catch { /* new file */ }
+
+  const body = {
+    message: 'Admin: atnaujinti kontaktai',
+    content: toBase64(JSON.stringify(contact, null, 2)),
+    branch,
+    ...(sha ? { sha } : {}),
+  };
+  const putRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${CONTACT_PATH}`,
+    { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!putRes.ok) { const e = await putRes.json(); throw new Error(e.message || putRes.statusText); }
+}
 
 document.getElementById('btnSettings').addEventListener('click', () => {
-  document.getElementById('ghOwner').value  = S.ghConfig.owner;
-  document.getElementById('ghRepo').value   = S.ghConfig.repo;
-  document.getElementById('ghBranch').value = S.ghConfig.branch || 'main';
-  document.getElementById('ghToken').value  = S.ghConfig.token;
-  hideError(document.getElementById('settingsError'));
-  hideError(document.getElementById('chgPassMsg'));
-  document.getElementById('chgPassOld').value = '';
-  document.getElementById('chgPassNew').value = '';
-  showModal('settingsModal');
+  document.getElementById('navSettings').click();
 });
 
-document.getElementById('settingsSaveBtn').addEventListener('click', () => {
+document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
   S.ghConfig = {
     owner:  document.getElementById('ghOwner').value.trim(),
     repo:   document.getElementById('ghRepo').value.trim(),
     branch: document.getElementById('ghBranch').value.trim() || 'main',
     token:  document.getElementById('ghToken').value.trim(),
   };
-  // Store without token to minimize exposure; token stored separately
-  localStorage.setItem(GH_KEY, JSON.stringify({
-    owner: S.ghConfig.owner,
-    repo:  S.ghConfig.repo,
-    branch: S.ghConfig.branch,
-    token: S.ghConfig.token,
-  }));
-  closeModal('settingsModal');
-  showStatusMsg('✅ Nustatymai išsaugoti.', 'success');
-});
+  localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
 
-document.getElementById('settingsCancelBtn').addEventListener('click', () => closeModal('settingsModal'));
-document.getElementById('settingsClose').addEventListener('click', () => closeModal('settingsModal'));
+  const phone = document.getElementById('setPhone').value.trim();
+  const email = document.getElementById('setEmail').value.trim();
+  const msg   = document.getElementById('settingsStatusMsg');
+  const btn   = document.getElementById('settingsSaveBtn');
+
+  const showMsg = (text, type) => {
+    msg.textContent = text;
+    msg.className = `status-msg ${type}`;
+    msg.classList.remove('hidden');
+    clearTimeout(msg._t);
+    msg._t = setTimeout(() => msg.classList.add('hidden'), 5000);
+  };
+
+  if (phone && email && S.ghConfig.owner && S.ghConfig.token) {
+    const contact = { phone, phoneRaw: phone.replace(/\s/g, ''), email };
+    S.contact = contact;
+    btn.disabled = true;
+    btn.textContent = '⏳ Saugoma...';
+    try {
+      await saveContactToGitHub(contact);
+      showMsg('✅ Nustatymai išsaugoti ir kontaktai atnaujinti GitHub.', 'success');
+    } catch (e) {
+      showMsg('❌ GitHub klaida: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '💾 Išsaugoti nustatymus';
+    }
+  } else {
+    showMsg('✅ Nustatymai išsaugoti.', 'success');
+  }
+});
 
 document.getElementById('btnChangePass').addEventListener('click', async () => {
   const oldPass  = document.getElementById('chgPassOld').value;
@@ -1053,7 +1121,7 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    ['formModal', 'settingsModal', 'confirmModal'].forEach(id => closeModal(id));
+    ['formModal', 'confirmModal'].forEach(id => closeModal(id));
   }
 });
 

@@ -76,6 +76,7 @@
     <nav class="section-nav">
       <button class="section-nav__btn active" data-section="props" id="navProps">🏠 Skelbimai</button>
       <button class="section-nav__btn" data-section="reviews" id="navReviews">★ Atsiliepimai <span id="pendingBadge" class="pending-badge hidden"></span></button>
+      <button class="section-nav__btn" data-section="settings" id="navSettings">⚙️ Nustatymai</button>
     </nav>
 
     <!-- ── Skelbimai section ── -->
@@ -134,7 +135,84 @@
         </div>
       </div>
     </main>
-  </div>
+
+    <!-- ── Nustatymai section ── -->
+    <main class="admin-main hidden" id="sectionSettings">
+      <div class="settings-page">
+
+        <div class="settings-card">
+          <h3 class="settings-card__title">📞 Kontaktinė informacija</h3>
+          <p class="hint">Rodoma svetainės kontaktų skyriuje ir porštėje. Išsaugojus atnaujinama GitHub.</p>
+          <div class="field-row">
+            <div class="field-group">
+              <label for="setPhone">Telefono numeris</label>
+              <input type="tel" id="setPhone" placeholder="+370 600 00 000" autocomplete="off" />
+            </div>
+            <div class="field-group">
+              <label for="setEmail">El. paštas</label>
+              <input type="email" id="setEmail" placeholder="ilona@ntilona.lt" autocomplete="off" />
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card__title">🔧 GitHub integracija</h3>
+          <p class="hint">Užpildykite, kad pakeitimai būtų automatiškai siunčiami į GitHub ir svetainė persistatytų.</p>
+          <div class="field-row">
+            <div class="field-group">
+              <label for="ghOwner">GitHub vartotojo vardas *</label>
+              <input type="text" id="ghOwner" placeholder="pvz. johndoe" autocomplete="off" />
+            </div>
+            <div class="field-group">
+              <label for="ghRepo">Repozitorijos pavadinimas *</label>
+              <input type="text" id="ghRepo" placeholder="pvz. broker_web" autocomplete="off" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label for="ghBranch">Branch</label>
+              <input type="text" id="ghBranch" placeholder="main" autocomplete="off" />
+            </div>
+            <div class="field-group">
+              <label for="ghToken">Personal Access Token *</label>
+              <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" />
+            </div>
+          </div>
+          <p class="hint">
+            Tokeną sukurkite čia: <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=NT+Ilona+Admin" target="_blank" rel="noopener">GitHub → Settings → Developer settings → Tokens (classic)</a>.
+            Reikalinga teisė: <strong>repo</strong>.
+          </p>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card__title">🔑 Slaptažodžio keitimas</h3>
+          <div class="field-row">
+            <div class="field-group">
+              <label for="chgPassOld">Dabartinis slaptažodis</label>
+              <input type="password" id="chgPassOld" autocomplete="current-password" />
+            </div>
+            <div class="field-group">
+              <label for="chgPassNew">Naujas slaptažodis</label>
+              <input type="password" id="chgPassNew" autocomplete="new-password" />
+            </div>
+            <div class="field-group">
+              <label for="chgPassNew2">Pakartokite naują</label>
+              <input type="password" id="chgPassNew2" autocomplete="new-password" />
+            </div>
+          </div>
+          <p id="chgPassMsg" class="form-error hidden"></p>
+          <button class="btn btn-outline" id="btnChangePass">Keisti slaptažodį</button>
+        </div>
+
+        <div class="settings-actions">
+          <button class="btn btn-danger" id="btnLogoutSettings">🚪 Atsijungti</button>
+          <button class="btn btn-primary" id="settingsSaveBtn">💾 Išsaugoti nustatymus</button>
+        </div>
+        <p id="settingsError" class="form-error hidden"></p>
+        <p id="settingsStatusMsg" class="status-msg hidden"></p>
+
+      </div>
+    </main>
 
   <!-- ── Skelbimo pridėjimo / redagavimo modalas ── -->
   <div id="formModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
@@ -284,73 +362,6 @@
             <button type="submit" class="btn btn-primary" id="formSaveBtn">Išsaugoti</button>
           </div>
         </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Nustatymų modalas ── -->
-  <div id="settingsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 id="settingsTitle">Nustatymai</h2>
-        <button class="modal-close" id="settingsClose" aria-label="Uždaryti">✕</button>
-      </div>
-      <div class="modal-body">
-        <h3 class="section-label">GitHub integracija</h3>
-        <p class="hint">Užpildykite, kad pakeitimai būtų automatiškai siunčiami į GitHub ir Cloudflare Pages perkurtų svetainę.</p>
-
-        <div class="field-row">
-          <div class="field-group">
-            <label for="ghOwner">GitHub vartotojo vardas *</label>
-            <input type="text" id="ghOwner" placeholder="pvz. johndoe" autocomplete="off" />
-          </div>
-          <div class="field-group">
-            <label for="ghRepo">Repozitorijos pavadinimas *</label>
-            <input type="text" id="ghRepo" placeholder="pvz. broker_web" autocomplete="off" />
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label for="ghBranch">Branch</label>
-            <input type="text" id="ghBranch" placeholder="main" autocomplete="off" />
-          </div>
-          <div class="field-group">
-            <label for="ghToken">Personal Access Token *</label>
-            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" />
-          </div>
-        </div>
-        <p class="hint">
-          Tokeną sukurkite čia: <a href="https://github.com/settings/tokens/new?scopes=repo&description=NT+Ilona+Admin" target="_blank" rel="noopener">GitHub → Settings → Developer settings → Tokens (classic)</a>.
-          Reikalinga teisė: <strong>repo</strong>.
-        </p>
-
-        <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb" />
-
-        <h3 class="section-label">Slaptažodžio keitimas</h3>
-        <div class="field-row">
-          <div class="field-group">
-            <label for="chgPassOld">Dabartinis slaptažodis</label>
-            <input type="password" id="chgPassOld" autocomplete="current-password" />
-          </div>
-          <div class="field-group">
-            <label for="chgPassNew">Naujas slaptažodis</label>
-            <input type="password" id="chgPassNew" autocomplete="new-password" />
-          </div>
-          <div class="field-group">
-            <label for="chgPassNew2">Pakartokite naują</label>
-            <input type="password" id="chgPassNew2" autocomplete="new-password" />
-          </div>
-        </div>
-        <p id="chgPassMsg" class="form-error hidden"></p>
-        <button class="btn btn-outline" id="btnChangePass">Keisti slaptažodį</button>
-
-        <p id="settingsError" class="form-error hidden" style="margin-top:12px"></p>
-
-        <div class="modal-footer" style="margin-top:20px">
-          <button class="btn btn-ghost" id="settingsCancelBtn">Atšaukti</button>
-          <button class="btn btn-danger" id="btnLogoutSettings" style="margin-right:auto">Atsijungti</button>
-          <button class="btn btn-primary" id="settingsSaveBtn">Išsaugoti nustatymus</button>
-        </div>
       </div>
     </div>
   </div>
