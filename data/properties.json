@@ -315,7 +315,7 @@
     "condition": "Tvarkingas",
     "equipment": "Visos komunikacijos",
     "desc": "Sklypas Druskininkų centro pakraštyje, ramiojeresidencijų zonoje. Visos komunikacijos: elektra, vandentiekis, kanalizacija, dujos – sklypo ribose. Tinka gyvenamojo namo ar poilsio namų statybai. Iki centro ir sanatorijų 5 min. pėsčiomis.",
-    "new": true,
+    "new": false,
     "images": [
       "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80",
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=900&q=80",
