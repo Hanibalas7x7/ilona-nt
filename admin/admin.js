@@ -26,6 +26,24 @@ const S = {
 
 // Image manager state
 let formImages = []; // { url: string, preview?: string, uploading?: boolean }
+let formNewId  = null; // pre-generated ID for new listings (keeps image folder consistent)
+
+// ── Kainos formatavimo pagalbinės funkcijos ───────────────────────────────────
+function parseEurAmount(str) {
+  const n = parseInt((str || '').replace(/[^\d]/g, ''), 10);
+  return isNaN(n) ? null : n;
+}
+function formatEur(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + ' \u20ac';
+}
+function autoCalcPriceSqm() {
+  const price = parseEurAmount(document.getElementById('fieldPrice').value);
+  const areaStr = (document.getElementById('fieldArea').value || '').replace(',', '.');
+  const area  = parseFloat(areaStr.replace(/[^\d.]/g, ''));
+  if (price && area > 0) {
+    document.getElementById('fieldPriceSqm').value = formatEur(Math.round(price / area)) + '/m\u00b2';
+  }
+}
 
 // ── Slaptažodžio maišos funkcijos (PBKDF2 + druska) ─────────────────────────
 
@@ -551,6 +569,7 @@ document.querySelectorAll('.filter-tab').forEach(btn => {
 
 function openForm(id = null) {
   S.editingId = id;
+  formNewId   = id === null ? nextId() : null; // pre-generate ID for folder naming
   const prop = id !== null ? S.properties.find(p => p.id === id) : null;
   const isEdit = !!prop;
 
@@ -591,6 +610,15 @@ function openForm(id = null) {
 
   hideError(document.getElementById('formError'));
   showModal('formModal');
+
+  // Price field auto-format (run once per form open to avoid duplicate listeners)
+  const fp = document.getElementById('fieldPrice');
+  const fa = document.getElementById('fieldArea');
+  fp.onblur = function() {
+    const n = parseEurAmount(this.value);
+    if (n) { this.value = formatEur(n); autoCalcPriceSqm(); }
+  };
+  fa.onblur = autoCalcPriceSqm;
 }
 
 document.getElementById('btnAdd').addEventListener('click', () => openForm(null));
@@ -613,7 +641,7 @@ document.getElementById('propForm').addEventListener('submit', (e) => {
   const images = formImages.map(i => i.url).filter(Boolean);
 
   const updated = {
-    id:          S.editingId !== null ? S.editingId : nextId(),
+    id:          S.editingId !== null ? S.editingId : formNewId,
     status:      document.getElementById('fieldStatus').value,
     type:        document.getElementById('fieldType').value,
     category:    document.getElementById('fieldCategory').value,
@@ -902,7 +930,7 @@ async function uploadFileToGitHub(base64, path) {
 async function handleImageFiles(files) {
   const statusEl = document.getElementById('uploadStatus');
   const hasGh    = S.ghConfig.owner && S.ghConfig.repo && S.ghConfig.token;
-  const id       = S.editingId !== null ? S.editingId : `new-${Date.now()}`;
+  const id       = S.editingId !== null ? S.editingId : formNewId;
   const folder   = `images/obj${id}`;
   const startIdx = formImages.length;
 
