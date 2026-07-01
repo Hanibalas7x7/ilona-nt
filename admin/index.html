@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NT Ilona – Administracija</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+
+  <!-- ── Prisijungimo ekranas ── -->
+  <div id="loginScreen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">🏠</div>
+      <h1>NT Ilona</h1>
+      <p class="auth-sub">Administracijos puslapis</p>
+
+      <!-- Naujo slaptažodžio nustatymas (pirmas kartas) -->
+      <form id="setupForm" class="auth-form hidden">
+        <p class="setup-hint">Pirmas prisijungimas. Nustatykite administracijos slaptažodį.</p>
+        <div class="field-group">
+          <label for="setupPass">Naujas slaptažodis</label>
+          <input type="password" id="setupPass" minlength="6" required autocomplete="new-password" />
+        </div>
+        <div class="field-group">
+          <label for="setupPass2">Pakartokite slaptažodį</label>
+          <input type="password" id="setupPass2" minlength="6" required autocomplete="new-password" />
+        </div>
+        <p id="setupError" class="form-error hidden"></p>
+        <button type="submit" class="btn btn-primary btn-full">Nustatyti slaptažodį</button>
+      </form>
+
+      <!-- Prisijungimo forma -->
+      <form id="loginForm" class="auth-form hidden">
+        <div class="field-group">
+          <label for="loginPass">Slaptažodis</label>
+          <input type="password" id="loginPass" required autocomplete="current-password" />
+        </div>
+        <p id="loginError" class="form-error hidden"></p>
+        <button type="submit" class="btn btn-primary btn-full">Prisijungti</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Pagrindinis admin ekranas ── -->
+  <div id="adminScreen" class="hidden">
+
+    <header class="admin-header">
+      <div class="admin-header__brand">
+        <span>🏠</span>
+        <span>NT Ilona – Administracija</span>
+      </div>
+      <div class="admin-header__actions">
+        <button id="btnAdd" class="btn btn-primary">+ Naujas skelbimas</button>
+        <button id="btnSettings" class="btn btn-outline" title="Nustatymai">⚙️ Nustatymai</button>
+        <button id="btnLogout" class="btn btn-ghost" title="Atsijungti">Atsijungti</button>
+      </div>
+    </header>
+
+    <!-- Section nav -->
+    <nav class="section-nav">
+      <button class="section-nav__btn active" data-section="props" id="navProps">🏠 Skelbimai</button>
+      <button class="section-nav__btn" data-section="reviews" id="navReviews">★ Atsiliepimai <span id="pendingBadge" class="pending-badge hidden"></span></button>
+    </nav>
+
+    <!-- ── Skelbimai section ── -->
+    <main class="admin-main" id="sectionProps">
+
+      <div class="toolbar">
+        <div class="filter-tabs" role="tablist" aria-label="Skelbimų filtras">
+          <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">Visi <span class="count" id="countAll"></span></button>
+          <button class="filter-tab" data-filter="active" role="tab" aria-selected="false">Aktyvūs <span class="count" id="countActive"></span></button>
+          <button class="filter-tab" data-filter="sold" role="tab" aria-selected="false">Parduoti <span class="count" id="countSold"></span></button>
+          <button class="filter-tab" data-filter="rented" role="tab" aria-selected="false">Išnuomoti <span class="count" id="countRented"></span></button>
+          <button class="filter-tab" data-filter="hidden" role="tab" aria-selected="false">Paslėpti <span class="count" id="countHidden"></span></button>
+        </div>
+        <div class="save-bar">
+          <span id="unsavedBadge" class="unsaved-badge hidden">● Neišsaugota</span>
+          <button id="btnSaveGh" class="btn btn-success">💾 Išsaugoti į GitHub</button>
+          <button id="btnExport" class="btn btn-outline">📥 Atsisiųsti JSON</button>
+        </div>
+      </div>
+
+      <div id="saveStatusMsg" class="status-msg hidden"></div>
+
+      <div class="table-wrap">
+        <table class="prop-table" aria-label="Skelbimų sąrašas">
+          <thead>
+            <tr>
+              <th style="width:54px">Nr.</th>
+              <th style="width:64px">Foto</th>
+              <th>Pavadinimas</th>
+              <th style="width:110px">Tipas</th>
+              <th style="width:120px">Kaina</th>
+              <th style="width:140px">Statusas</th>
+              <th style="width:90px">Veiksmai</th>
+            </tr>
+          </thead>
+          <tbody id="propTableBody"></tbody>
+        </table>
+        <p id="emptyMsg" class="empty-msg hidden">Nėra skelbimų pagal pasirinktą filtrą.</p>
+      </div>
+
+    </main>
+
+    <!-- ── Atsiliepimai section ── -->
+    <main class="admin-main hidden" id="sectionReviews">
+      <div id="reviewsStatusMsg" class="status-msg hidden"></div>
+
+      <div class="reviews-section">
+        <div class="reviews-col">
+          <h3 class="reviews-col__title">⏳ Laukia patvirtinimo <span class="reviews-count" id="pendingCount">0</span></h3>
+          <div id="pendingList" class="review-cards"></div>
+        </div>
+        <div class="reviews-col">
+          <h3 class="reviews-col__title">✅ Patvirtinti <span class="reviews-count" id="approvedCount">0</span></h3>
+          <div id="approvedList" class="review-cards"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Skelbimo pridėjimo / redagavimo modalas ── -->
+  <div id="formModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <h2 id="formModalTitle">Naujas skelbimas</h2>
+        <button class="modal-close" id="formModalClose" aria-label="Uždaryti">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="propForm" novalidate>
+          <input type="hidden" id="fieldId" />
+
+          <div class="form-grid">
+            <!-- Kairė -->
+            <div>
+              <h3 class="section-label">Pagrindinė informacija</h3>
+              <div class="field-group">
+                <label for="fieldTitle">Pavadinimas *</label>
+                <input type="text" id="fieldTitle" required />
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="fieldType">Sandoris *</label>
+                  <select id="fieldType">
+                    <option value="pirkti">Pardavimas</option>
+                    <option value="nuomoti">Nuoma</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label for="fieldCategory">Kategorija *</label>
+                  <select id="fieldCategory">
+                    <option value="butas">Butas</option>
+                    <option value="namas">Namas</option>
+                    <option value="sklypas">Sklypas</option>
+                    <option value="komercinis">Komercinis NT</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="fieldStatus">Statusas *</label>
+                  <select id="fieldStatus">
+                    <option value="active">Aktyvus</option>
+                    <option value="sold">Parduota</option>
+                    <option value="rented">Išnuomota</option>
+                    <option value="hidden">Paslėptas</option>
+                  </select>
+                </div>
+                <div class="field-group" style="align-self:flex-end;padding-bottom:8px">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="fieldNew" />
+                    <span>Pažymėti kaip „Naujas"</span>
+                  </label>
+                </div>
+              </div>
+
+              <h3 class="section-label" style="margin-top:18px">Kaina ir plotas</h3>
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="fieldPrice">Kaina *</label>
+                  <input type="text" id="fieldPrice" placeholder="pvz. 185 000 €" required />
+                </div>
+                <div class="field-group">
+                  <label for="fieldPriceSqm">Kaina/m²</label>
+                  <input type="text" id="fieldPriceSqm" placeholder="pvz. 2 500 €/m²" />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="fieldArea">Plotas *</label>
+                  <input type="text" id="fieldArea" placeholder="pvz. 74 m²" required />
+                </div>
+                <div class="field-group">
+                  <label for="fieldRooms">Kambariai</label>
+                  <input type="text" id="fieldRooms" placeholder="pvz. 3" />
+                </div>
+                <div class="field-group">
+                  <label for="fieldFloor">Aukštas</label>
+                  <input type="text" id="fieldFloor" placeholder="pvz. 4/6" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Dešinė -->
+            <div>
+              <h3 class="section-label">Vieta ir detalės</h3>
+              <div class="field-group">
+                <label for="fieldAddress">Adresas</label>
+                <input type="text" id="fieldAddress" placeholder="pvz. Antakalnio g. 42, Vilnius" />
+              </div>
+              <div class="field-group">
+                <label for="fieldLocation">Rajonas (kortelei)</label>
+                <input type="text" id="fieldLocation" placeholder="pvz. Vilnius, Antakalnis" />
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="fieldYear">Statybos metai</label>
+                  <input type="text" id="fieldYear" placeholder="pvz. 2005" />
+                </div>
+                <div class="field-group">
+                  <label for="fieldEnergy">Energetinė klasė</label>
+                  <input type="text" id="fieldEnergy" placeholder="pvz. B" />
+                </div>
+              </div>
+              <div class="field-group">
+                <label for="fieldHeating">Šildymas</label>
+                <input type="text" id="fieldHeating" placeholder="pvz. Centrinis" />
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="fieldCondition">Būklė</label>
+                  <input type="text" id="fieldCondition" placeholder="pvz. Puiki" />
+                </div>
+                <div class="field-group">
+                  <label for="fieldEquipment">Įrengimas</label>
+                  <input type="text" id="fieldEquipment" placeholder="pvz. Pilnai įrengtas" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Per visą plotį -->
+          <div class="field-group" style="margin-top:4px">
+            <label for="fieldDesc">Aprašymas</label>
+            <textarea id="fieldDesc" rows="4" placeholder="Išsamus skelbimo aprašymas..."></textarea>
+          </div>
+
+          <div class="field-group">
+            <label>Nuotraukos</label>
+            <div class="img-manager">
+              <div id="imgPreviewList" class="img-preview-list">
+                <p class="img-empty">Dar nėra nuotraukų</p>
+              </div>
+              <div class="img-upload-row" id="imgDropZone">
+                <input type="file" id="imgFileInput" accept="image/*" multiple hidden />
+                <button type="button" id="btnPickImages" class="btn btn-outline">📷 Pridėti nuotraukas</button>
+                <span class="upload-hint">arba vilkite čia &middot; JPG/PNG → automatiškai sukompresuojama ir įkeliama į GitHub</span>
+              </div>
+              <div id="uploadStatus" class="upload-status hidden"></div>
+            </div>
+          </div>
+
+          <p id="formError" class="form-error hidden"></p>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" id="formCancelBtn">Atšaukti</button>
+            <button type="submit" class="btn btn-primary" id="formSaveBtn">Išsaugoti</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Nustatymų modalas ── -->
+  <div id="settingsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="settingsTitle">Nustatymai</h2>
+        <button class="modal-close" id="settingsClose" aria-label="Uždaryti">✕</button>
+      </div>
+      <div class="modal-body">
+        <h3 class="section-label">GitHub integracija</h3>
+        <p class="hint">Užpildykite, kad pakeitimai būtų automatiškai siunčiami į GitHub ir Cloudflare Pages perkurtų svetainę.</p>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="ghOwner">GitHub vartotojo vardas *</label>
+            <input type="text" id="ghOwner" placeholder="pvz. johndoe" autocomplete="off" />
+          </div>
+          <div class="field-group">
+            <label for="ghRepo">Repozitorijos pavadinimas *</label>
+            <input type="text" id="ghRepo" placeholder="pvz. broker_web" autocomplete="off" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label for="ghBranch">Branch</label>
+            <input type="text" id="ghBranch" placeholder="main" autocomplete="off" />
+          </div>
+          <div class="field-group">
+            <label for="ghToken">Personal Access Token *</label>
+            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" />
+          </div>
+        </div>
+        <p class="hint">
+          Tokeną sukurkite čia: <a href="https://github.com/settings/tokens/new?scopes=repo&description=NT+Ilona+Admin" target="_blank" rel="noopener">GitHub → Settings → Developer settings → Tokens (classic)</a>.
+          Reikalinga teisė: <strong>repo</strong>.
+        </p>
+
+        <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb" />
+
+        <h3 class="section-label">Slaptažodžio keitimas</h3>
+        <div class="field-row">
+          <div class="field-group">
+            <label for="chgPassOld">Dabartinis slaptažodis</label>
+            <input type="password" id="chgPassOld" autocomplete="current-password" />
+          </div>
+          <div class="field-group">
+            <label for="chgPassNew">Naujas slaptažodis</label>
+            <input type="password" id="chgPassNew" autocomplete="new-password" />
+          </div>
+        </div>
+        <p id="chgPassMsg" class="form-error hidden"></p>
+        <button class="btn btn-outline" id="btnChangePass">Keisti slaptažodį</button>
+
+        <p id="settingsError" class="form-error hidden" style="margin-top:12px"></p>
+
+        <div class="modal-footer" style="margin-top:20px">
+          <button class="btn btn-ghost" id="settingsCancelBtn">Atšaukti</button>
+          <button class="btn btn-primary" id="settingsSaveBtn">Išsaugoti nustatymus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Patvirtinimo dialogo modalas ── -->
+  <div id="confirmModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal modal--sm">
+      <div class="modal-body" style="text-align:center;padding:32px 28px">
+        <div style="font-size:2.4rem;margin-bottom:12px">🗑️</div>
+        <h2 id="confirmMsg" style="font-size:1.05rem;margin-bottom:24px"></h2>
+        <div style="display:flex;gap:12px;justify-content:center">
+          <button class="btn btn-ghost" id="confirmNo">Atšaukti</button>
+          <button class="btn btn-danger" id="confirmYes">Ištrinti</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

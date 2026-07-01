@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tweeter Excursion Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --clr-primary:     #1a5f3c;
+      --clr-primary-dk:  #134a2e;
+      --clr-primary-lt:  #e8f5ee;
+      --clr-accent:      #e8a020;
+      --clr-accent-dk:   #c4841a;
+      --clr-text:        #1a1a2e;
+      --clr-text-muted:  #6b7280;
+      --clr-bg:          #ffffff;
+      --clr-bg-alt:      #f8faf9;
+      --clr-border:      #e5e7eb;
+      --clr-white:       #ffffff;
+      --clr-danger:      #dc2626;
+      --clr-danger-lt:   #fef2f2;
+      --clr-ok:          #16a34a;
+      --clr-ok-lt:       #f0fdf4;
+      --clr-warn:        #d97706;
+      --clr-warn-lt:     #fffbeb;
+
+      --font-body:    'Inter', system-ui, sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.14);
+
+      --transition: 220ms ease;
+      --container: 900px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--clr-text);
+      background: var(--clr-bg-alt);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Header ── */
+    .header {
+      background: var(--clr-primary);
+      color: var(--clr-white);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .header__icon { font-size: 1.6rem; }
+
+    .header__title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .header__sub {
+      font-size: 0.8rem;
+      opacity: 0.75;
+      margin-top: 1px;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    main { padding: 36px 20px 60px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 680px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--clr-white);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--clr-border);
+    }
+
+    .card__title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--clr-primary);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--clr-primary-lt);
+    }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 16px; }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--clr-text-muted);
+      margin-bottom: 6px;
+    }
+
+    label .unit {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--clr-primary);
+      background: var(--clr-primary-lt);
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--clr-text);
+      background: var(--clr-bg);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--clr-primary);
+      box-shadow: 0 0 0 3px rgba(26,95,60,.12);
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
+
+    .field__hint {
+      font-size: 0.72rem;
+      color: var(--clr-text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      border: none;
+      font-family: var(--font-body);
+    }
+
+    .btn--primary {
+      background: var(--clr-primary);
+      color: var(--clr-white);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn--primary:hover {
+      background: var(--clr-primary-dk);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn--primary:active { transform: translateY(0); }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--clr-text-muted);
+      border: 1.5px solid var(--clr-border);
+    }
+
+    .btn--ghost:hover { background: var(--clr-bg-alt); color: var(--clr-text); }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Results ── */
+    .results-card {
+      grid-column: 1 / -1;
+      display: none;
+    }
+
+    .results-card.visible { display: block; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .result-box {
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      border: 1.5px solid transparent;
+    }
+
+    .result-box--ok     { background: var(--clr-ok-lt);   border-color: #bbf7d0; }
+    .result-box--warn   { background: var(--clr-warn-lt);  border-color: #fde68a; }
+    .result-box--danger { background: var(--clr-danger-lt); border-color: #fecaca; }
+    .result-box--info   { background: var(--clr-primary-lt); border-color: #a7f3d0; }
+
+    .result-box__label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--clr-text-muted);
+      margin-bottom: 6px;
+    }
+
+    .result-box__value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .result-box--ok     .result-box__value  { color: var(--clr-ok); }
+    .result-box--warn   .result-box__value  { color: var(--clr-warn); }
+    .result-box--danger .result-box__value  { color: var(--clr-danger); }
+    .result-box--info   .result-box__value  { color: var(--clr-primary); }
+
+    .result-box__sub {
+      font-size: 0.75rem;
+      color: var(--clr-text-muted);
+      margin-top: 3px;
+    }
+
+    /* ── Status badge ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .badge--ok     { background: var(--clr-ok-lt);    color: var(--clr-ok); }
+    .badge--warn   { background: var(--clr-warn-lt);   color: var(--clr-warn); }
+    .badge--danger { background: var(--clr-danger-lt); color: var(--clr-danger); }
+
+    /* ── Sweep table ── */
+    .sweep-section { margin-top: 24px; }
+
+    .sweep-section h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--clr-text-muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 12px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--clr-border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead {
+      background: var(--clr-primary);
+      color: var(--clr-white);
+    }
+
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 9px 14px;
+      border-top: 1px solid var(--clr-border);
+      white-space: nowrap;
+    }
+
+    tr:nth-child(even) td { background: var(--clr-bg-alt); }
+
+    .td-ok     { color: var(--clr-ok);     font-weight: 600; }
+    .td-warn   { color: var(--clr-warn);   font-weight: 600; }
+    .td-danger { color: var(--clr-danger); font-weight: 600; }
+
+    /* ── Bar chart ── */
+    .bar-cell { width: 120px; }
+
+    .bar-wrap {
+      height: 10px;
+      background: var(--clr-border);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width .3s ease;
+    }
+
+    .bar-fill--ok     { background: var(--clr-ok); }
+    .bar-fill--warn   { background: var(--clr-warn); }
+    .bar-fill--danger { background: var(--clr-danger); }
+
+    /* ── Info boxes ── */
+    .info-box {
+      background: var(--clr-primary-lt);
+      border-left: 4px solid var(--clr-primary);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 0.83rem;
+      color: var(--clr-text);
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    .info-box strong { color: var(--clr-primary); }
+
+    /* ── Formula card ── */
+    .formula-card {
+      grid-column: 1 / -1;
+      background: var(--clr-white);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--clr-border);
+    }
+
+    .formula-card details > summary {
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--clr-text-muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      user-select: none;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .formula-card details > summary::before {
+      content: '▶';
+      font-size: 0.65rem;
+      transition: transform .2s;
+      color: var(--clr-primary);
+    }
+
+    .formula-card details[open] > summary::before { transform: rotate(90deg); }
+
+    .formula-body {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--clr-text);
+    }
+
+    .formula-body code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      background: var(--clr-bg-alt);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--clr-primary-dk);
+    }
+
+    .formula-block {
+      background: var(--clr-bg-alt);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      margin: 12px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.88rem;
+      color: var(--clr-primary-dk);
+    }
+
+    /* ── Page title ── */
+    .page-title {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .page-title h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      color: var(--clr-text);
+      margin-bottom: 8px;
+    }
+
+    .page-title p {
+      color: var(--clr-text-muted);
+      font-size: 0.92rem;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ── Toggle switch ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      background: var(--clr-bg-alt);
+      border: 1.5px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color var(--transition);
+    }
+    .toggle-row:has(input:checked) {
+      border-color: var(--clr-accent);
+      background: var(--clr-warn-lt);
+    }
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--clr-accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .toggle-row__label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--clr-text);
+    }
+    .toggle-row__sub {
+      font-size: 0.75rem;
+      color: var(--clr-text-muted);
+    }
+    .cap-fields {
+      display: none;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .cap-fields.visible { display: grid; grid-template-columns: 1fr 1fr; }
+    .cap-info-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: var(--clr-warn-lt);
+      border: 1px solid #fde68a;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--clr-warn);
+      margin-top: 4px;
+    }
+
+    /* ── Sweep config ── */
+    .sweep-config {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 520px) {
+      .sweep-config { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__icon">🔊</div>
+    <div>
+      <div class="header__title">Tweeter Excursion Calculator</div>
+      <div class="header__sub">Peak cone displacement · Mass-controlled region analysis</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="page-title">
+        <h1>Tweeter Excursion Calculator</h1>
+        <p>Enter your driver's Thiele–Small parameters and operating conditions to calculate peak cone displacement and safe operating limits.</p>
+        <div style="display:inline-flex;align-items:center;gap:10px;margin-top:12px;background:var(--clr-primary-lt);border:1.5px solid #a7f3d0;border-radius:var(--radius-md);padding:8px 18px;font-size:0.82rem;color:var(--clr-primary);font-weight:500;">
+          <span>⚙</span>
+          <span>Loaded: <strong>SEAS H2606 / 920000</strong> — 1&Prime; tweeter, Re 4.7 Ω, Xmax ±0.2 mm, Fs 1030 Hz</span>
+          <button onclick="resetDefaults()" style="margin-left:6px;font-size:0.75rem;padding:3px 10px;border-radius:20px;background:var(--clr-primary);color:#fff;border:none;cursor:pointer;font-family:inherit;">Reset</button>
+        </div>
+      </div>
+
+      <div class="grid">
+
+        <!-- ── Driver Parameters ── -->
+        <div class="card">
+          <div class="card__title">Driver Parameters</div>
+
+          <div class="field">
+            <label for="re">DC Resistance (Re) <span class="unit">Ω</span></label>
+            <input type="number" id="re" value="4.7" min="0.1" step="0.1" />
+            <div class="field__hint">Voice coil DC resistance</div>
+          </div>
+
+          <div class="field">
+            <label for="le">Voice Coil Inductance (Le) <span class="unit">mH</span></label>
+            <input type="number" id="le" value="0.05" min="0" step="0.01" />
+            <div class="field__hint">Used in cap voltage divider Z(f) model</div>
+          </div>
+
+          <div class="field">
+            <label for="bl">Force Factor (Bl) <span class="unit">T·m</span></label>
+            <input type="number" id="bl" value="3.3" min="0.1" step="0.1" />
+            <div class="field__hint">Motor strength — magnetic flux × coil length</div>
+          </div>
+
+          <div class="field">
+            <label for="mms">Moving Mass (Mms) <span class="unit">g</span></label>
+            <input type="number" id="mms" value="0.4" min="0.01" step="0.01" />
+            <div class="field__hint">Total moving mass including air load</div>
+          </div>
+
+          <div class="field">
+            <label for="fs">Resonant Frequency (Fs) <span class="unit">Hz</span></label>
+            <input type="number" id="fs" value="1030" min="100" step="10" />
+            <div class="field__hint">Used to identify mass-controlled region</div>
+          </div>
+
+          <div class="field">
+            <label for="qms">Mechanical Q factor (Qms)</label>
+            <input type="number" id="qms" value="2.1" min="0.1" step="0.1" />
+            <div class="field__hint">Derives Rms = ωs·Mms / Qms for Z(f)</div>
+          </div>
+
+          <div class="field">
+            <label for="xmax">Max Linear Excursion (Xmax) <span class="unit">mm</span></label>
+            <input type="number" id="xmax" value="0.2" min="0.01" step="0.01" />
+            <div class="field__hint">One-way peak linear displacement limit</div>
+          </div>
+        </div>
+
+        <!-- ── Operating Conditions ── -->
+        <div class="card">
+          <div class="card__title">Operating Conditions</div>
+
+          <div class="field">
+            <label for="vrms">Input Voltage (V) <span class="unit">V RMS</span></label>
+            <input type="number" id="vrms" value="0.8" min="0.01" step="0.01" />
+            <div class="field__hint">RMS voltage across the driver terminals</div>
+          </div>
+
+          <div class="field">
+            <label for="freq">Analysis Frequency (f) <span class="unit">Hz</span></label>
+            <input type="number" id="freq" value="500" min="100" step="100" />
+            <div class="field__hint">Single-tone frequency to analyse</div>
+          </div>
+
+          <div class="card__title" style="margin-top:24px;">Protection Capacitor</div>
+
+          <label class="toggle-row" id="capToggleRow">
+            <input type="checkbox" id="capEnabled" onchange="toggleCap()" />
+            <div>
+              <div class="toggle-row__label">Series protection cap</div>
+              <div class="toggle-row__sub">Simulates capacitor voltage divider — shows V at driver</div>
+            </div>
+          </label>
+
+          <div class="cap-fields" id="capFields">
+            <div class="field">
+              <label for="capValue">Capacitance <span class="unit">µF</span></label>
+              <input type="number" id="capValue" value="100" min="0.1" step="1" onchange="updateCapFc()" />
+            </div>
+            <div class="field">
+              <label>Cutoff freq (fc)</label>
+              <div style="display:flex;align-items:center;height:42px;">
+                <span class="cap-info-pill" id="capFcPill">— Hz</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card__title" style="margin-top:8px;">Frequency Sweep</div>
+
+          <div class="sweep-config">
+            <div class="field">
+              <label for="fStart">Start <span class="unit">Hz</span></label>
+              <input type="number" id="fStart" value="500" min="20" step="50" />
+            </div>
+            <div class="field">
+              <label for="fEnd">End <span class="unit">Hz</span></label>
+              <input type="number" id="fEnd" value="20000" min="100" step="100" />
+            </div>
+            <div class="field">
+              <label for="fSteps">Points</label>
+              <input type="number" id="fSteps" value="24" min="5" max="100" step="1" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn--primary" onclick="calculate()">&#9654; Calculate</button>
+            <button class="btn btn--ghost" onclick="resetDefaults()">↺ Reset</button>
+          </div>
+        </div>
+
+        <!-- ── Results ── -->
+        <div class="card results-card" id="resultsCard">
+          <div class="card__title">Results</div>
+
+          <div class="result-grid" id="resultGrid"></div>
+
+          <div class="sweep-section">
+            <h3>Frequency Sweep — Peak Excursion vs. Frequency</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Frequency (Hz)</th>
+                    <th id="thVdriver">V input (RMS)</th>
+                    <th>Peak Excursion (mm)</th>
+                    <th>% of Xmax</th>
+                    <th>Max Safe V<sub>in</sub> (RMS)</th>
+                    <th>Cap atten.</th>
+                    <th>Status</th>
+                    <th class="bar-cell">Utilisation</th>
+                  </tr>
+                </thead>
+                <tbody id="sweepBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="info-box" id="infoBox"></div>
+        </div>
+
+        <!-- ── Formula reference ── -->
+        <div class="formula-card">
+          <details>
+            <summary>Formula Reference &amp; Theory</summary>
+            <div class="formula-body">
+              <p>For a tweeter operating in the <strong>mass-controlled region</strong> (f ≫ Fs), peak cone displacement is:</p>
+              <div class="formula-block">
+                x_peak = (Bl × V_rms × √2) / (Re × Mms × (2πf)²)
+              </div>
+              <p>Where:</p>
+              <ul style="margin-left:18px; margin-top:8px;">
+                <li><code>Bl</code> — force factor (T·m)</li>
+                <li><code>V_rms</code> — RMS voltage across driver (V)</li>
+                <li><code>Re</code> — DC voice coil resistance (Ω)</li>
+                <li><code>Mms</code> — total moving mass (kg)</li>
+                <li><code>f</code> — frequency (Hz)</li>
+              </ul>
+              <p style="margin-top:12px;">The <strong>maximum safe voltage</strong> at a given frequency (before Xmax is exceeded):</p>
+              <div class="formula-block">
+                V_rms_max = Xmax × Re × Mms × (2πf)² / (Bl × √2)
+              </div>
+              <p style="margin-top:12px;">The <strong>minimum safe frequency</strong> at a given voltage:</p>
+              <div class="formula-block">
+                f_min = √( Bl × V_rms × √2 / (Re × Mms × (2π)² × Xmax) )
+              </div>
+              <p style="margin-top:12px; color: var(--clr-text-muted); font-size:0.8rem;">
+                Note: This model assumes the driver is fully mass-controlled (ω ≫ ω₀). Results are most accurate well above Fs. Near or below Fs, acoustic loading and compliance effects become significant.
+              </p>
+            </div>
+          </details>
+        </div>
+
+      </div><!-- .grid -->
+    </div><!-- .container -->
+  </main>
+
+  <script>
+    function toggleCap() {
+      const on = document.getElementById('capEnabled').checked;
+      document.getElementById('capFields').classList.toggle('visible', on);
+      if (on) updateCapFc();
+      calculate();
+    }
+
+    function updateCapFc() {
+      const Re  = val('re');
+      const Le  = val('le')  || 0;
+      const Bl  = val('bl');
+      const Mms = val('mms');
+      const Fs  = val('fs');
+      const Qms = val('qms');
+      const C   = val('capValue');
+      if ([Re, C, Bl, Mms, Fs, Qms].some(v => !isFinite(v) || v <= 0)) return;
+      // Nominal fc based on Re (reference)
+      const fcNom = 1 / (2 * Math.PI * Re * C * 1e-6);
+      // Actual -3dB point: find f where capGain = 1/√2 (bisection)
+      let lo = 10, hi = fcNom * 20;
+      for (let i = 0; i < 60; i++) {
+        const mid = (lo + hi) / 2;
+        capGain(mid, Re, Le, Bl, Mms, Fs, Qms, C) > Math.SQRT1_2 ? hi = mid : lo = mid;
+      }
+      const fcActual = (lo + hi) / 2;
+      document.getElementById('capFcPill').textContent =
+        fcActual.toFixed(0) + ' Hz (−3 dB actual, Re-based: ' + fcNom.toFixed(0) + ' Hz)';
+    }
+
+    /**
+     * Voltage fraction reaching driver through series cap (first-order HP).
+     * H(f) = (f/fc) / sqrt(1 + (f/fc)²)   where fc = 1/(2π·Re·C)
+     */
+    function capGain(f, Re, C_uF) {
+      const fc = 1 / (2 * Math.PI * Re * C_uF * 1e-6);
+      const ratio = f / fc;
+      return ratio / Math.sqrt(1 + ratio * ratio);
+    }
+
+    // SEAS H2606 / 920000 — Hvc=1.6mm, Hg=2.0mm → Xmax=(2.0-1.6)/2=0.2mm (underhung)
+    const defaults = {
+      re: 4.7, le: 0.05, bl: 3.3, mms: 0.4, fs: 1030, qms: 2.1,
+      xmax: 0.2, vrms: 0.8, freq: 500,
+      fStart: 500, fEnd: 20000, fSteps: 24
+    };
+
+    function val(id) {
+      return parseFloat(document.getElementById(id).value);
+    }
+
+    /**
+     * Full driver electrical impedance Z(ω) using T-S parameters.
+     * Z = Re + jωLe + Bl² / (Rms + jωMms + 1/(jωCms))
+     * where Cms = 1/(Mms·ωs²),  Rms = ωs·Mms / Qms
+     * Returns { real, imag, mag }
+     */
+    function driverImpedance(f, Re, Le_mH, Bl, Mms_g, Fs, Qms) {
+      const omega  = 2 * Math.PI * f;
+      const omegas = 2 * Math.PI * Fs;
+      const Mms    = Mms_g / 1000;
+      const Le     = Le_mH / 1000;
+      const Cms    = 1 / (Mms * omegas * omegas);
+      const Rms    = (omegas * Mms) / Qms;
+
+      // Mechanical branch denominator: Rms + j(ωMms - 1/(ωCms))
+      const mechR  = Rms;
+      const mechI  = omega * Mms - 1 / (omega * Cms);
+      const mechM2 = mechR * mechR + mechI * mechI;
+
+      // Motional impedance: Zmot = Bl² / (mechR + j·mechI)
+      //                          = Bl² · (mechR - j·mechI) / mechM2
+      const zmotR  = Bl * Bl * mechR / mechM2;
+      const zmotI  = -Bl * Bl * mechI / mechM2;
+
+      const Zr = Re + zmotR;
+      const Zi = omega * Le + zmotI;
+      return { real: Zr, imag: Zi, mag: Math.sqrt(Zr * Zr + Zi * Zi) };
+    }
+
+    /**
+     * Peak excursion (mm). Uses full Z(f) for voice-coil current.
+     * I_peak = V_peak / |Z(f)|,  x_peak = Bl·I_peak / (Mms·ω²)
+     */
+    function peakExcursion(Vrms, Re, Le_mH, Bl, Mms_g, Fs, Qms, f) {
+      const Mms  = Mms_g / 1000;
+      const omega = 2 * Math.PI * f;
+      const Z    = driverImpedance(f, Re, Le_mH, Bl, Mms_g, Fs, Qms);
+      return (Bl * Vrms * Math.SQRT2) / (Z.mag * Mms * omega * omega) * 1000; // mm
+    }
+
+    /**
+     * Maximum safe driver voltage (V RMS) before Xmax is exceeded.
+     * Vrms_max = Xmax · |Z(f)| · Mms · ω² / (Bl · √2)
+     */
+    function maxSafeVoltage(Xmax_mm, Re, Le_mH, Bl, Mms_g, Fs, Qms, f) {
+      const Xmax = Xmax_mm / 1000;
+      const Mms  = Mms_g  / 1000;
+      const omega = 2 * Math.PI * f;
+      const Z    = driverImpedance(f, Re, Le_mH, Bl, Mms_g, Fs, Qms);
+      return (Xmax * Z.mag * Mms * omega * omega) / (Bl * Math.SQRT2);
+    }
+
+    /**
+     * Minimum safe frequency — bisection search (Z(f) varies so no closed form).
+     */
+    function minSafeFreq(Vrms, Re, Le_mH, Bl, Mms_g, Fs, Qms, Xmax_mm) {
+      let lo = 20, hi = Math.max(Fs * 3, 5000);
+      // Check if even at lo it's safe
+      if (peakExcursion(Vrms, Re, Le_mH, Bl, Mms_g, Fs, Qms, lo) <= Xmax_mm) return lo;
+      for (let i = 0; i < 60; i++) {
+        const mid = (lo + hi) / 2;
+        peakExcursion(Vrms, Re, Le_mH, Bl, Mms_g, Fs, Qms, mid) > Xmax_mm
+          ? lo = mid : hi = mid;
+      }
+      return (lo + hi) / 2;
+    }
+
+    /**
+     * Voltage fraction reaching driver through series cap + complex driver impedance.
+     * H = Z(f) / (Z(f) + 1/(jωC))   — full voltage divider, not simple Re-based 1st-order.
+     */
+    function capGain(f, Re, Le_mH, Bl, Mms_g, Fs, Qms, C_uF) {
+      const omega = 2 * Math.PI * f;
+      const Z = driverImpedance(f, Re, Le_mH, Bl, Mms_g, Fs, Qms);
+      // Zcap = 1/(jωC) = 0 - j/(omega*C)
+      const ZcapI = -1 / (omega * C_uF * 1e-6);
+      // Total: (Z.real) + j(Z.imag + ZcapI)
+      const totR  = Z.real;
+      const totI  = Z.imag + ZcapI;
+      const totMag = Math.sqrt(totR * totR + totI * totI);
+      return Z.mag / totMag;
+    }
+
+    function statusInfo(pct) {
+      if (pct <= 75)  return { cls: 'ok',     label: '✔ Safe' };
+      if (pct <= 100) return { cls: 'warn',   label: '⚠ Near Limit' };
+      return              { cls: 'danger', label: '✘ Exceeded' };
+    }
+
+    function fmt(n, dec = 2) {
+      return isFinite(n) ? n.toFixed(dec) : '—';
+    }
+
+    function calculate() {
+      const Re    = val('re');
+      const Le    = val('le')  || 0;
+      const Bl    = val('bl');
+      const Mms   = val('mms');
+      const Fs    = val('fs');
+      const Qms   = val('qms');
+      const Xmax  = val('xmax');
+      const Vrms  = val('vrms');
+      const f     = val('freq');
+      const fStart = val('fStart');
+      const fEnd   = val('fEnd');
+      const fSteps = Math.max(5, Math.min(100, Math.round(val('fSteps'))));
+
+      // Validate
+      if ([Re, Bl, Mms, Fs, Qms, Xmax, Vrms, f].some(v => !isFinite(v) || v <= 0)) {
+        alert('Please enter valid positive numbers for all fields.');
+        return;
+      }
+
+      const useCap  = document.getElementById('capEnabled').checked;
+      const C_uF    = useCap ? val('capValue') : null;
+
+      // Voltage actually reaching driver at analysis frequency
+      const gainF   = useCap ? capGain(f, Re, Le, Bl, Mms, Fs, Qms, C_uF) : 1;
+      const Vdriver = Vrms * gainF;
+      const Vpeak   = Vdriver * Math.SQRT2;
+      const P_eq    = Vdriver * Vdriver / Re;
+
+      // ── Single-frequency result ──
+      const xPeak      = peakExcursion(Vdriver, Re, Le, Bl, Mms, Fs, Qms, f);
+      const pct        = (xPeak / Xmax) * 100;
+      const vMaxDriver = maxSafeVoltage(Xmax, Re, Le, Bl, Mms, Fs, Qms, f);
+      const vMax       = useCap ? vMaxDriver / gainF : vMaxDriver;
+      const fMin       = minSafeFreq(Vdriver, Re, Le, Bl, Mms, Fs, Qms, Xmax);
+      const si         = statusInfo(pct);
+
+      // Cap fc for display (Re-based nominal)
+      const capFc      = useCap ? (1 / (2 * Math.PI * Re * C_uF * 1e-6)) : null;
+      const capAttenDB = useCap ? 20 * Math.log10(gainF) : 0;
+
+      // ── Populate result boxes ──
+      const grid = document.getElementById('resultGrid');
+      grid.innerHTML = `
+        <div class="result-box result-box--${si.cls}">
+          <div class="result-box__label">Peak Excursion</div>
+          <div class="result-box__value">${fmt(xPeak, 3)} mm</div>
+          <div class="result-box__sub">at ${f} Hz · ${fmt(Vdriver,3)} V at driver</div>
+        </div>
+        <div class="result-box result-box--${si.cls}">
+          <div class="result-box__label">Xmax Utilisation</div>
+          <div class="result-box__value">${fmt(pct, 1)} %</div>
+          <div class="result-box__sub"><span class="badge badge--${si.cls}">${si.label}</span></div>
+        </div>
+        <div class="result-box result-box--info">
+          <div class="result-box__label">Max Safe V${useCap ? ' input' : ''} @ ${f} Hz</div>
+          <div class="result-box__value">${fmt(vMax, 2)} V RMS</div>
+          <div class="result-box__sub">${useCap ? fmt(vMaxDriver,3)+' V at driver · ' : ''}${fmt(vMax*vMax/Re,2)} W equiv.</div>
+        </div>
+        ${useCap ? `
+        <div class="result-box result-box--warn">
+          <div class="result-box__label">Cap @ ${f} Hz</div>
+          <div class="result-box__value">${fmt(capAttenDB, 1)} dB</div>
+          <div class="result-box__sub">fc = ${fmt(capFc,0)} Hz · VituixCAD offset: +${fmt(-capAttenDB,1)} dB</div>
+        </div>` : `
+        <div class="result-box result-box--info">
+          <div class="result-box__label">Min Safe Frequency</div>
+          <div class="result-box__value">${fmt(fMin, 0)} Hz</div>
+          <div class="result-box__sub">crossover point @ ${fmt(Vrms,1)} V RMS</div>
+        </div>`}
+      `;
+
+      // ── Frequency sweep table ──
+      const tbody = document.getElementById('sweepBody');
+      tbody.innerHTML = '';
+
+      const logStart = Math.log10(Math.max(fStart, 20));
+      const logEnd   = Math.log10(Math.max(fEnd, fStart + 100));
+      const rows     = [];
+
+      for (let i = 0; i < fSteps; i++) {
+        const fi = Math.round(Math.pow(10, logStart + (logEnd - logStart) * i / (fSteps - 1)));
+        rows.push(fi);
+      }
+
+      // Ensure analysis frequency is included
+      if (!rows.includes(Math.round(f))) rows.push(Math.round(f));
+      rows.sort((a, b) => a - b);
+
+      // Update table header for cap mode
+      document.getElementById('thVdriver').textContent =
+        useCap ? 'V input (RMS)' : 'V input (RMS)';
+
+      rows.forEach(fi => {
+        const gainI   = useCap ? capGain(fi, Re, Le, Bl, Mms, Fs, Qms, C_uF) : 1;
+        const Vdri    = Vrms * gainI;
+        const xi      = peakExcursion(Vdri, Re, Le, Bl, Mms, Fs, Qms, fi);
+        const pcti    = (xi / Xmax) * 100;
+        const vmiDrv  = maxSafeVoltage(Xmax, Re, Le, Bl, Mms, Fs, Qms, fi);
+        const vmiIn   = useCap ? vmiDrv / gainI : vmiDrv;
+        const attenI  = useCap ? 20 * Math.log10(gainI) : null;
+        const si2     = statusInfo(pcti);
+        const barPct  = Math.min(pcti, 100).toFixed(1);
+        const isAnalysis = Math.round(fi) === Math.round(f);
+
+        const tr = document.createElement('tr');
+        if (isAnalysis) tr.style.fontWeight = '600';
+        tr.innerHTML = `
+          <td>${fi.toLocaleString()}${isAnalysis ? ' ★' : ''}</td>
+          <td>${fmt(Vrms, 3)}</td>
+          <td class="td-${si2.cls}">${fmt(xi, 3)}</td>
+          <td class="td-${si2.cls}">${fmt(pcti, 1)}%</td>
+          <td>${fmt(vmiIn, 3)} V</td>
+          <td>${useCap ? fmt(attenI,1)+' dB' : '—'}</td>
+          <td><span class="badge badge--${si2.cls}">${si2.label}</span></td>
+          <td class="bar-cell">
+            <div class="bar-wrap">
+              <div class="bar-fill bar-fill--${si2.cls}" style="width:${barPct}%"></div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // ── Info summary ──
+      const infoBox = document.getElementById('infoBox');
+      const capSummary = useCap
+        ? ` Series cap <strong>${fmt(C_uF,0)} µF</strong> (fc = ${fmt(capFc,0)} Hz) attenuates by <strong>${fmt(capAttenDB,1)} dB</strong> at ${f} Hz — driver sees <strong>${fmt(Vdriver,3)} V RMS</strong>. <em>VituixCAD: add +${fmt(-capAttenDB,1)} dB offset to correct measurement.</em>`
+        : '';
+      infoBox.innerHTML = `
+        <strong>Summary:</strong> At ${f} Hz with ${fmt(Vrms,1)} V RMS input (${fmt(Vpeak,1)} V peak,
+        ${fmt(P_eq,2)} W into ${Re} Ω), peak excursion is
+        <strong>${fmt(xPeak, 3)} mm</strong> (${fmt(pct, 1)}% of Xmax ${Xmax} mm).
+        Max safe input voltage: <strong>${fmt(vMax, 2)} V RMS</strong>.
+        Min safe frequency: <strong>${fmt(fMin, 0)} Hz</strong>.${capSummary}
+        ${pct > 100
+          ? ' <strong style="color:var(--clr-danger)">⚠ Xmax is exceeded — increase crossover frequency or reduce voltage.</strong>'
+          : pct > 75
+          ? ' Consider a higher crossover or lower voltage for safety margin.'
+          : ' Driver is operating safely within linear range.'}
+      `;
+
+      // Show results
+      document.getElementById('resultsCard').classList.add('visible');
+      document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetDefaults() {
+      Object.entries(defaults).forEach(([id, v]) => {
+        document.getElementById(id).value = v;
+      });
+      document.getElementById('capEnabled').checked = false;
+      document.getElementById('capFields').classList.remove('visible');
+      document.getElementById('resultsCard').classList.remove('visible');
+    }
+
+    // Highlight Xmax row info
+    function xmaxNote(xmax) {
+      return `Xmax ${xmax} mm (underhung: Hg 2.0 mm − Hvc 1.6 mm) / 2`;
+    }
+
+    // Auto-calculate on load for a default preview
+    window.addEventListener('DOMContentLoaded', calculate);
+  </script>
+</body>
+</html>

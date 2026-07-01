@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NT Ilona – nekilnojamojo turto brokerė Lietuvoje. Pirkimas, pardavimas, nuoma. Profesionali pagalba kiekviename žingsnyje." />
+  <meta name="keywords" content="nekilnojamas turtas, brokeris, pirkti butą, parduoti namą, nuoma, NT Ilona, ntilona.lt" />
+  <meta property="og:title" content="NT Ilona – Nekilnojamojo turto brokerė" />
+  <meta property="og:description" content="Profesionali nekilnojamojo turto brokerė Lietuvoje. Padėsiu pirkti, parduoti ar išnuomoti." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ntilona.lt" />
+  <title>NT Ilona – Nekilnojamojo turto brokerė</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- NAVIGACIJA -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#" class="logo" aria-label="NT Ilona – pradžia">
+        <span class="logo__icon">🏠</span>
+        <span class="logo__text">NT <strong>Ilona</strong></span>
+      </a>
+      <nav class="nav" id="nav" aria-label="Pagrindinis meniu">
+        <ul class="nav__list">
+          <li><a href="#paieska" class="nav__link">Paieška</a></li>
+          <li><a href="#objektai" class="nav__link">Objektai</a></li>
+          <li><a href="#paslaugos" class="nav__link">Paslaugos</a></li>
+          <li><a href="#apie" class="nav__link">Apie mane</a></li>
+          <li><a href="#atsiliepimai" class="nav__link">Atsiliepimai</a></li>
+          <li><a href="#kontaktai" class="nav__link nav__link--cta">Susisiekti</a></li>
+        </ul>
+      </nav>
+      <button class="burger" id="burger" aria-label="Atidaryti meniu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="paieska">
+    <div class="hero__bg" aria-hidden="true">
+      <div class="hero__overlay"></div>
+    </div>
+    <div class="container hero__content">
+      <div class="hero__badge">✦ Patikimas brokeris</div>
+      <h1 class="hero__title">Jūsų namų<br/><span class="hero__title--accent">paieška prasideda čia</span></h1>
+      <p class="hero__subtitle">Profesionali pagalba perkant, parduodant ir nuomojant nekilnojamąjį turtą visoje Lietuvoje.</p>
+      <div class="search-box" role="search">
+        <div class="search-box__tabs" role="tablist">
+          <button class="search-tab active" role="tab" aria-selected="true" data-tab="pirkti">Pirkti</button>
+          <button class="search-tab" role="tab" aria-selected="false" data-tab="nuomoti">Nuomoti</button>
+        </div>
+        <div class="search-box__fields">
+          <div class="search-field">
+            <label for="vieta" class="search-field__label">Vieta</label>
+            <select id="vieta" class="search-field__input" aria-label="Pasirinkti miestą">
+              <option value="">Miestas / rajonas</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label for="tipas" class="search-field__label">Tipas</label>
+            <select id="tipas" class="search-field__input" aria-label="Pasirinkti NT tipą">
+              <option value="">NT tipas</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label for="kaina" class="search-field__label">Kaina iki</label>
+            <select id="kaina" class="search-field__input" aria-label="Pasirinkti kainą">
+              <option value="">Maksimali kaina</option>
+            </select>
+          </div>
+          <button class="btn btn--primary search-box__btn" id="searchBtn" aria-label="Ieškoti objektų">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Ieškoti
+          </button>
+        </div>
+      </div>
+      <div class="hero__stats" aria-label="Statistika">
+        <div class="stat">
+          <span class="stat__number" data-target="247">0</span>
+          <span class="stat__label">Parduoti objektai</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-target="12">0</span>
+          <span class="stat__label">Metų patirtis</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-target="98">0</span>
+          <span class="stat__label">% patenkintų klientų</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJEKTAI -->
+  <section class="section" id="objektai">
+    <div class="container">
+      <div class="section__header">
+        <span class="section__tag">Aktualūs pasiūlymai</span>
+        <h2 class="section__title">Naujausi objektai</h2>
+        <p class="section__desc">Rinktiniai nekilnojamojo turto objektai – tik geriausi pasiūlymai jums.</p>
+      </div>
+      <div class="filter-bar" role="toolbar" aria-label="Filtravimas pagal tipą">
+        <button class="filter-btn active" data-filter="visi">Visi</button>
+        <button class="filter-btn" data-filter="butas">Butai</button>
+        <button class="filter-btn" data-filter="namas">Namai</button>
+        <button class="filter-btn" data-filter="sklypas">Sklypai</button>
+        <button class="filter-btn" data-filter="komercinis">Komercinis</button>
+      </div>
+      <div class="listings" id="listings" aria-live="polite"></div>
+      <div class="section__footer">
+        <button class="btn btn--outline" id="loadMore">Rodyti daugiau</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASLAUGOS -->
+  <section class="section section--alt" id="paslaugos">
+    <div class="container">
+      <div class="section__header">
+        <span class="section__tag">Ką siūlau</span>
+        <h2 class="section__title">Paslaugos</h2>
+        <p class="section__desc">Visapusiška pagalba nekilnojamojo turto klausimais – nuo konsultacijos iki sandorio užbaigimo.</p>
+      </div>
+      <div class="services">
+        <article class="service-card">
+          <div class="service-card__icon" aria-hidden="true">🔑</div>
+          <h3 class="service-card__title">Pirkimas</h3>
+          <p class="service-card__text">Padėsiu rasti idealų būstą pagal jūsų poreikius ir biudžetą. Derybos, patikrinimas, dokumentai – viską atliekame kartu.</p>
+        </article>
+        <article class="service-card">
+          <div class="service-card__icon" aria-hidden="true">💰</div>
+          <h3 class="service-card__title">Pardavimas</h3>
+          <p class="service-card__text">Profesionali turto vertė, marketingas ir fotografija. Parduosime greitai ir už geriausią kainą.</p>
+        </article>
+        <article class="service-card">
+          <div class="service-card__icon" aria-hidden="true">🏢</div>
+          <h3 class="service-card__title">Nuoma</h3>
+          <p class="service-card__text">Ieškote nuomojamo būsto arba norite išnuomoti savo turtą? Pasirūpinsime viskuo.</p>
+        </article>
+        <article class="service-card">
+          <div class="service-card__icon" aria-hidden="true">📋</div>
+          <h3 class="service-card__title">Konsultacija</h3>
+          <p class="service-card__text">Nemokami patarimai dėl investicijų į NT, rinkos tendencijų ir turto įsigijimo strategijų.</p>
+        </article>
+        <article class="service-card">
+          <div class="service-card__icon" aria-hidden="true">🏦</div>
+          <h3 class="service-card__title">Paskolos</h3>
+          <p class="service-card__text">Padėsiu susitvarkyti būsto paskolą – konsultuosiu dėl tinkamiausio banko ir sąlygų.</p>
+        </article>
+        <article class="service-card">
+          <div class="service-card__icon" aria-hidden="true">📐</div>
+          <h3 class="service-card__title">Turto vertinimas</h3>
+          <p class="service-card__text">Profesionalus rinkos kainos įvertinimas pagal dabartines rinkos sąlygas ir turto ypatybes.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- APIE -->
+  <section class="section" id="apie">
+    <div class="container">
+      <div class="about">
+        <div class="about__image-wrap">
+          <div class="about__image" aria-label="Ilona – NT brokerė">
+            <div class="about__image-placeholder" aria-hidden="true">
+              <span class="about__initials">I</span>
+            </div>
+          </div>
+          <div class="about__badge-float" aria-hidden="true">
+            <strong>12+</strong>
+            <span>metų patirtis</span>
+          </div>
+        </div>
+        <div class="about__content">
+          <span class="section__tag">Apie mane</span>
+          <h2 class="section__title">Sveiki, aš – Ilona</h2>
+          <p class="about__text">Esu sertifikuota nekilnojamojo turto brokerė su daugiau nei 12 metų patirtimi Lietuvos rinkoje. Per šiuos metus padėjau šimtams šeimų rasti savo svajonių namus ir sėkmingai parduoti turtą.</p>
+          <p class="about__text">Mano prioritetas – jūsų interesai. Dirbu atvirai, sąžiningai ir profesionaliai. Kiekvieną klientą aptarnauju individualiai.</p>
+          <ul class="about__list">
+            <li>✔ Licencijuota NT brokerė</li>
+            <li>✔ Narė: Lietuvos NT brokerių asociacija</li>
+            <li>✔ Specializacija: Vilnius, Kaunas, pajūrys</li>
+            <li>✔ Konsultacijos lietuvių, rusų, anglų k.</li>
+          </ul>
+          <a href="#kontaktai" class="btn btn--primary">Susisiekti su manimi</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATSILIEPIMAI -->
+  <section class="section section--alt" id="atsiliepimai">
+    <div class="container">
+      <div class="section__header">
+        <span class="section__tag">Klientų nuomonė</span>
+        <h2 class="section__title">Atsiliepimai</h2>
+      </div>
+      <div class="testimonials" id="testimonials">
+        <div class="testimonial-track" id="testimonialTrack">
+          <!-- Populated dynamically from data/testimonials.json -->
+        </div>
+      </div>
+      <div class="testimonial-dots" id="testimonialDots" role="tablist" aria-label="Atsiliepimų navigacija"></div>
+      <div class="testimonials-footer">
+        <button class="btn btn--outline" id="btnLeaveReview">✍️ Palikti atsiliepimą</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATSILIEPIMO FORMA (modal) -->
+  <div class="review-overlay" id="reviewOverlay" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+    <div class="review-modal">
+      <button class="review-modal__close" id="reviewClose" aria-label="Uždaryti">✕</button>
+      <div id="reviewFormWrap">
+        <h3 class="review-modal__title" id="reviewModalTitle">Jūsų atsiliepimas</h3>
+        <form id="reviewForm" novalidate>
+          <div class="review-stars-row" id="reviewStarsRow" role="group" aria-label="Įvertinimas žvaigždutėmis">
+            <button type="button" data-star="1" aria-label="1 žvaigždutė">★</button>
+            <button type="button" data-star="2" aria-label="2 žvaigždutės">★</button>
+            <button type="button" data-star="3" aria-label="3 žvaigždutės">★</button>
+            <button type="button" data-star="4" aria-label="4 žvaigždutės">★</button>
+            <button type="button" data-star="5" aria-label="5 žvaigždutės">★</button>
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label for="reviewName" style="display:block;font-size:.85rem;font-weight:600;margin-bottom:6px">Vardas *</label>
+            <input class="form-input" type="text" id="reviewName" required maxlength="60" placeholder="Vardas Pavardė" />
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label for="reviewCity" style="display:block;font-size:.85rem;font-weight:600;margin-bottom:6px">Miestas</label>
+            <input class="form-input" type="text" id="reviewCity" maxlength="40" placeholder="pvz. Vilnius" />
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label for="reviewText" style="display:block;font-size:.85rem;font-weight:600;margin-bottom:6px">Atsiliepimas *</label>
+            <textarea class="form-input form-textarea" id="reviewText" rows="4" required maxlength="500" placeholder="Parašykite savo atsiliepimą..."></textarea>
+          </div>
+          <p id="reviewFormError" class="form-error hidden"></p>
+          <button type="submit" class="btn btn--primary" style="width:100%;justify-content:center">Pateikti atsiliepimą</button>
+        </form>
+      </div>
+      <div id="reviewSuccess" class="review-success hidden">
+        <div class="review-success__icon">✅</div>
+        <h4>Ačiū!</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- KONTAKTAI -->
+  <section class="section" id="kontaktai">
+    <div class="container">
+      <div class="contact">
+        <div class="contact__info">
+          <span class="section__tag">Susisiekite</span>
+          <h2 class="section__title">Parašykite man</h2>
+          <p class="contact__desc">Turite klausimų? Norite parduoti, pirkti ar nuomoti? Susisiekite – konsultacija nemokama.</p>
+          <div class="contact__details">
+            <div class="contact__item">
+              <span class="contact__icon" aria-hidden="true">📞</span>
+              <div>
+                <strong>Telefonas</strong>
+                <a href="tel:+37060000000">+370 600 00 000</a>
+              </div>
+            </div>
+            <div class="contact__item">
+              <span class="contact__icon" aria-hidden="true">✉️</span>
+              <div>
+                <strong>El. paštas</strong>
+                <a href="mailto:ilona@ntilona.lt">ilona@ntilona.lt</a>
+              </div>
+            </div>
+            <div class="contact__item">
+              <span class="contact__icon" aria-hidden="true">📍</span>
+              <div>
+                <strong>Biuras</strong>
+                <span>Vilnius, Lietuva</span>
+              </div>
+            </div>
+            <div class="contact__item">
+              <span class="contact__icon" aria-hidden="true">🕐</span>
+              <div>
+                <strong>Darbo laikas</strong>
+                <span>Pr–Pt: 9:00–18:00</span>
+              </div>
+            </div>
+          </div>
+          <div class="contact__social">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+          </div>
+        </div>
+        <form class="contact-form" id="contactForm" novalidate aria-label="Kontaktų forma">
+          <div class="form-group">
+            <label for="name" class="form-label">Vardas *</label>
+            <input type="text" id="name" name="name" class="form-input" placeholder="Jūsų vardas" required autocomplete="name" />
+            <span class="form-error" id="nameError" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="email" class="form-label">El. paštas *</label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="jusu@email.lt" required autocomplete="email" />
+            <span class="form-error" id="emailError" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="phone" class="form-label">Telefonas</label>
+            <input type="tel" id="phone" name="phone" class="form-input" placeholder="+370 600 00 000" autocomplete="tel" />
+          </div>
+          <div class="form-group">
+            <label for="tema" class="form-label">Tema</label>
+            <select id="tema" name="tema" class="form-input">
+              <option value="">Pasirinkite temą</option>
+              <option value="pirkimas">Noriu pirkti</option>
+              <option value="pardavimas">Noriu parduoti</option>
+              <option value="nuoma">Nuoma</option>
+              <option value="konsultacija">Konsultacija</option>
+              <option value="kita">Kita</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="zinute" class="form-label">Žinutė *</label>
+            <textarea id="zinute" name="zinute" class="form-input form-textarea" placeholder="Parašykite savo klausimą ar užklausą..." required rows="4"></textarea>
+            <span class="form-error" id="zinuteError" role="alert"></span>
+          </div>
+          <div class="form-group form-group--checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" id="sutinku" name="sutinku" required />
+              <span class="checkbox-custom" aria-hidden="true"></span>
+              Sutinku su <a href="/privatumo-politika" target="_blank">privatumo politika</a> *
+            </label>
+            <span class="form-error" id="sutinkuError" role="alert"></span>
+          </div>
+          <button type="submit" class="btn btn--primary btn--full">Siųsti žinutę</button>
+          <div class="form-success" id="formSuccess" role="status" aria-live="polite" hidden>
+            ✅ Žinutė išsiųsta! Susisieksiu su jumis artimiausiu metu.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="#" class="logo logo--white" aria-label="NT Ilona – pradžia">
+          <span class="logo__icon">🏠</span>
+          <span class="logo__text">NT <strong>Ilona</strong></span>
+        </a>
+        <p class="footer__tagline">Jūsų patikimas nekilnojamojo turto partneris Lietuvoje.</p>
+      </div>
+      <div class="footer__links">
+        <h4>Nuorodos</h4>
+        <ul>
+          <li><a href="#objektai">Objektai</a></li>
+          <li><a href="#paslaugos">Paslaugos</a></li>
+          <li><a href="#apie">Apie mane</a></li>
+          <li><a href="#kontaktai">Kontaktai</a></li>
+        </ul>
+      </div>
+      <div class="footer__links">
+        <h4>Paslaugos</h4>
+        <ul>
+          <li><a href="#paslaugos">Pirkimas</a></li>
+          <li><a href="#paslaugos">Pardavimas</a></li>
+          <li><a href="#paslaugos">Nuoma</a></li>
+          <li><a href="#paslaugos">Konsultacija</a></li>
+        </ul>
+      </div>
+      <div class="footer__contact">
+        <h4>Kontaktai</h4>
+        <p><a href="tel:+37060000000">+370 600 00 000</a></p>
+        <p><a href="mailto:ilona@ntilona.lt">ilona@ntilona.lt</a></p>
+        <p>Vilnius, Lietuva</p>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="container footer__bottom-inner">
+        <p>© <span id="year"></span> ntilona.lt – Visos teisės saugomos</p>
+        <a href="/privatumo-politika">Privatumo politika</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll to top -->
+  <button class="scroll-top" id="scrollTop" aria-label="Grįžti į viršų" title="Į viršų">▲</button>
+
+  <!-- OBJEKTO MODALAS -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" id="modal">
+      <button class="modal__close" id="modalClose" aria-label="Uždaryti">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <!-- Galerija -->
+      <div class="modal__gallery">
+        <div class="modal__gallery-main" tabindex="0" aria-label="Nuotraukų galerija">
+          <img class="modal__gallery-img" id="modalGalleryImg" src="" alt="" decoding="async" />
+          <span class="modal__badge" id="modalBadge"></span>
+          <button class="modal__gallery-arrow modal__gallery-prev" id="modalGalleryPrev" aria-label="Ankstesnė nuotrauka">&#8249;</button>
+          <button class="modal__gallery-arrow modal__gallery-next" id="modalGalleryNext" aria-label="Kita nuotrauka">&#8250;</button>
+          <span class="modal__gallery-counter" id="modalGalleryCounter" aria-live="polite"></span>
+        </div>
+        <div class="modal__gallery-thumbs" id="modalGalleryThumbs" role="list" aria-label="Nuotraukų miniatiūros"></div>
+      </div>
+
+      <!-- Detalės -->
+      <div class="modal__body">
+        <div class="modal__price-block">
+          <p class="modal__price" id="modalPrice"></p>
+          <p class="modal__price-sqm" id="modalPriceSqm"></p>
+        </div>
+        <h2 class="modal__title" id="modalTitle"></h2>
+        <p class="modal__location" id="modalLocation"></p>
+
+        <table class="modal__table" id="modalTable" aria-label="Objekto charakteristikos"></table>
+
+        <div class="modal__desc-label">Aprašymas</div>
+        <div class="modal__desc" id="modalDesc"></div>
+
+        <div class="modal__actions">
+          <a href="#kontaktai" class="btn btn--primary" id="modalContact">📞 Susisiekti dėl šio objekto</a>
+          <button class="btn btn--outline modal__fav-btn" id="modalFav" aria-label="Dalintis">🔗 Dalintis</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

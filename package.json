@@ -1,0 +1,14 @@
+{
+  "name": "broker-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/compress-images.mjs",
+    "build:watch": "node scripts/compress-images.mjs --watch",
+    "dev": "npx serve . -p 3000"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}

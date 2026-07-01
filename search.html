@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NT Ilona – nekilnojamojo turto paieškos rezultatai." />
+  <meta name="robots" content="noindex" />
+  <title>Paieška – NT Ilona</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Search page specific ── */
+    .search-page-header {
+      background: var(--clr-primary);
+      padding: 20px 0 0;
+      margin-top: 68px;
+    }
+
+    .search-refine {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 12px;
+      padding: 20px 0;
+    }
+
+    .search-refine__tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .search-refine__tab {
+      padding: 8px 20px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-radius: 99px;
+      background: transparent;
+      color: rgba(255,255,255,.75);
+      font-weight: 600;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .search-refine__tab.active {
+      background: #fff;
+      color: var(--clr-primary);
+      border-color: #fff;
+    }
+
+    .search-refine__fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .search-refine__select {
+      padding: 8px 12px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: .88rem;
+      font-family: inherit;
+      cursor: pointer;
+      min-width: 150px;
+    }
+
+    .search-refine__select option { background: var(--clr-primary); color: #fff; }
+
+    .search-refine__btn {
+      background: var(--clr-accent);
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: .9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .search-refine__btn:hover { background: #d4923d; }
+
+    .search-results-section {
+      padding: 40px 0 80px;
+    }
+
+    .search-results__meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .results-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--clr-text);
+    }
+
+    .results-count {
+      font-size: .9rem;
+      color: var(--clr-text-muted);
+      font-weight: 500;
+    }
+
+    .back-link {
+      font-size: .88rem;
+      color: var(--clr-primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--clr-text-muted);
+    }
+
+    .no-results__icon { font-size: 3rem; margin-bottom: 14px; }
+    .no-results h2 { font-size: 1.2rem; margin-bottom: 8px; color: var(--clr-text); }
+
+    @media (max-width: 640px) {
+      .search-refine { flex-direction: column; align-items: stretch; }
+      .search-refine__fields { flex-direction: column; }
+      .search-refine__select { min-width: 0; }
+      .search-results__meta { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGACIJA -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="index.html" class="logo" aria-label="NT Ilona – pradžia">
+        <span class="logo__icon">🏠</span>
+        <span class="logo__text">NT <strong>Ilona</strong></span>
+      </a>
+      <nav class="nav" id="nav" aria-label="Pagrindinis meniu">
+        <ul class="nav__list">
+          <li><a href="index.html#paieska" class="nav__link">Paieška</a></li>
+          <li><a href="index.html#objektai" class="nav__link">Objektai</a></li>
+          <li><a href="index.html#paslaugos" class="nav__link">Paslaugos</a></li>
+          <li><a href="index.html#apie" class="nav__link">Apie mane</a></li>
+          <li><a href="index.html#atsiliepimai" class="nav__link">Atsiliepimai</a></li>
+          <li><a href="index.html#kontaktai" class="nav__link nav__link--cta">Susisiekti</a></li>
+        </ul>
+      </nav>
+      <button class="burger" id="burger" aria-label="Atidaryti meniu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- PAIEŠKOS REFINEMENT BAR -->
+  <div class="search-page-header">
+    <div class="container">
+      <div class="search-refine">
+        <div class="search-refine__tabs">
+          <button class="search-refine__tab active" data-tab="pirkti">Pirkti</button>
+          <button class="search-refine__tab" data-tab="nuomoti">Nuomoti</button>
+        </div>
+        <div class="search-refine__fields">
+          <select id="srVieta" class="search-refine__select" aria-label="Vieta">
+            <option value="">Miestas / rajonas</option>
+          </select>
+          <select id="srTipas" class="search-refine__select" aria-label="NT tipas">
+            <option value="">NT tipas</option>
+          </select>
+          <select id="srKaina" class="search-refine__select" aria-label="Kaina iki">
+            <option value="">Maksimali kaina</option>
+          </select>
+        </div>
+        <button class="search-refine__btn" id="srBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ieškoti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REZULTATAI -->
+  <section class="search-results-section">
+    <div class="container">
+      <div class="search-results__meta">
+        <div>
+          <h1 class="results-title" id="resultsTitle">Paieška</h1>
+          <p class="results-count" id="resultsCount"></p>
+        </div>
+        <a href="index.html" class="back-link">← Grįžti į pagrindinį</a>
+      </div>
+
+      <div class="filter-bar" role="toolbar" aria-label="Filtravimas pagal tipą">
+        <button class="filter-btn active" data-filter="visi">Visi</button>
+        <button class="filter-btn" data-filter="butas">Butai</button>
+        <button class="filter-btn" data-filter="namas">Namai</button>
+        <button class="filter-btn" data-filter="sklypas">Sklypai</button>
+        <button class="filter-btn" data-filter="komercinis">Komercinis</button>
+      </div>
+
+      <div class="listings__grid" id="listings" aria-live="polite" aria-label="Paieškos rezultatai"></div>
+
+      <div id="noResults" class="no-results" hidden>
+        <div class="no-results__icon">🔍</div>
+        <h2>Skelbimų nerasta</h2>
+        <p>Pabandykite pakeisti paieškos kriterijus arba peržiūrėkite visus objektus.</p>
+        <a href="index.html#objektai" class="btn btn--primary" style="margin-top:20px;display:inline-flex">Visi objektai</a>
+      </div>
+
+      <div style="text-align:center;margin-top:36px">
+        <button class="btn btn--outline" id="loadMore" hidden>Rodyti daugiau</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="index.html" class="logo logo--white" aria-label="NT Ilona – pradžia">
+          <span class="logo__icon">🏠</span>
+          <span class="logo__text">NT <strong>Ilona</strong></span>
+        </a>
+        <p class="footer__tagline">Jūsų patikimas nekilnojamojo turto partneris Lietuvoje.</p>
+      </div>
+      <div class="footer__links">
+        <h4>Nuorodos</h4>
+        <ul>
+          <li><a href="index.html#objektai">Objektai</a></li>
+          <li><a href="index.html#paslaugos">Paslaugos</a></li>
+          <li><a href="index.html#apie">Apie mane</a></li>
+          <li><a href="index.html#kontaktai">Kontaktai</a></li>
+        </ul>
+      </div>
+      <div class="footer__links">
+        <h4>Paslaugos</h4>
+        <ul>
+          <li><a href="index.html#paslaugos">Pirkimas</a></li>
+          <li><a href="index.html#paslaugos">Pardavimas</a></li>
+          <li><a href="index.html#paslaugos">Nuoma</a></li>
+          <li><a href="index.html#paslaugos">Konsultacija</a></li>
+        </ul>
+      </div>
+      <div class="footer__contact">
+        <h4>Kontaktai</h4>
+        <p><a href="tel:+37060000000">+370 600 00 000</a></p>
+        <p><a href="mailto:ilona@ntilona.lt">ilona@ntilona.lt</a></p>
+        <p>Vilnius, Lietuva</p>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="container footer__bottom-inner">
+        <p>© <span id="year"></span> ntilona.lt – Visos teisės saugomos</p>
+        <a href="index.html">Pagrindinis</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll to top -->
+  <button class="scroll-top" id="scrollTop" aria-label="Grįžti į viršų" title="Į viršų">▲</button>
+
+  <!-- OBJEKTO MODALAS -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" id="modal">
+      <button class="modal__close" id="modalClose" aria-label="Uždaryti">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal__gallery">
+        <div class="modal__gallery-main" tabindex="0" aria-label="Nuotraukų galerija">
+          <img class="modal__gallery-img" id="modalGalleryImg" src="" alt="" decoding="async" />
+          <span class="modal__badge" id="modalBadge"></span>
+          <button class="modal__gallery-arrow modal__gallery-prev" id="modalGalleryPrev" aria-label="Ankstesnė nuotrauka">&#8249;</button>
+          <button class="modal__gallery-arrow modal__gallery-next" id="modalGalleryNext" aria-label="Kita nuotrauka">&#8250;</button>
+          <span class="modal__gallery-counter" id="modalGalleryCounter" aria-live="polite"></span>
+        </div>
+        <div class="modal__gallery-thumbs" id="modalGalleryThumbs" role="list" aria-label="Nuotraukų miniatiūros"></div>
+      </div>
+      <div class="modal__body">
+        <div class="modal__price-block">
+          <p class="modal__price" id="modalPrice"></p>
+          <p class="modal__price-sqm" id="modalPriceSqm"></p>
+        </div>
+        <h2 class="modal__title" id="modalTitle"></h2>
+        <p class="modal__location" id="modalLocation"></p>
+        <table class="modal__table" id="modalTable" aria-label="Objekto charakteristikos"></table>
+        <div class="modal__desc-label">Aprašymas</div>
+        <div class="modal__desc" id="modalDesc"></div>
+        <div class="modal__actions">
+          <a href="index.html#kontaktai" class="btn btn--primary" id="modalContact">📞 Susisiekti dėl šio objekto</a>
+          <button class="btn btn--outline modal__fav-btn" id="modalFav" aria-label="Dalintis">🔗 Dalintis</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/search.js"></script>
+</body>
+</html>

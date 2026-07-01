@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "Laura K.",
+    "location": "Vilnius",
+    "initials": "LK",
+    "rating": 5,
+    "text": "Ilona padėjo mums rasti tobulą butą Vilniuje. Viskas buvo organizuota profesionaliai ir greitai. Labai rekomenduoju!",
+    "status": "approved"
+  },
+  {
+    "id": 2,
+    "name": "Marius P.",
+    "location": "Kaunas",
+    "initials": "MP",
+    "rating": 5,
+    "text": "Pardavėme namą per 3 savaites – ir už geresnę kainą nei tikėjomės. Ilona dirba širdingai ir profesionaliai.",
+    "status": "approved"
+  },
+  {
+    "id": 3,
+    "name": "Tomas J.",
+    "location": "Klaipėda",
+    "initials": "TJ",
+    "rating": 5,
+    "text": "Pirmą kartą pirkau butą ir buvau labai nervingas. Ilona viską paaiškino, palaikė ir padėjo įveikti visas biurokratines kliūtis.",
+    "status": "approved"
+  },
+  {
+    "id": 4,
+    "name": "Rasa B.",
+    "location": "Vilnius",
+    "initials": "RB",
+    "rating": 5,
+    "text": "Puikus profesionalumas. Ilona visuomet atsiliepė, atsakė į klausimus ir pasirūpino, kad sandoris vyktų sklandžiai.",
+    "status": "approved"
+  },
+  {
+    "id": 5,
+    "name": "Elena V.",
+    "location": "Šiauliai",
+    "initials": "EV",
+    "rating": 5,
+    "text": "Nuomojomės butą per Iloną – greita, paprasta, be streso. Visus dokumentus sutvarkė ji pati.",
+    "status": "approved"
+  }
+]
