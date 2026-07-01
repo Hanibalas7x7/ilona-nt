@@ -18,10 +18,17 @@
 
       <!-- Naujo slaptažodžio nustatymas (pirmas kartas) -->
       <form id="setupForm" class="auth-form hidden">
-        <p class="setup-hint">Pirmas prisijungimas. Įveskite sąrankos kodą ir nustatykite slaptažodį.</p>
+        <p class="setup-hint">Pirmas prisijungimas. Patvirtinkite tapatybę GitHub tokenu.</p>
         <div class="field-group">
-          <label for="setupCode">Sąrankos kodas</label>
-          <input type="password" id="setupCode" required autocomplete="off" placeholder="Sąrankos kodas" />
+          <label for="setupOwner">GitHub vartotojas / repo</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="setupOwner" placeholder="vartotojas" autocomplete="off" style="flex:1" />
+            <input type="text" id="setupRepo"  placeholder="repo" autocomplete="off" style="flex:1" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="setupToken">GitHub Personal Access Token</label>
+          <input type="password" id="setupToken" required autocomplete="off" placeholder="ghp_xxxxxxxxxxxx" />
         </div>
         <div class="field-group">
           <label for="setupPass">Naujas slaptažodis</label>

@@ -13,10 +13,6 @@ const PENDING_KEY       = 'ntilona_pending_reviews';
 const HASH_GH_PATH      = 'admin/.pwdhash';          // slaptažodžio hash GitHub repozitorijoje
 const HASH_ON_GH_KEY    = 'ntilona_hash_on_gh';      // žyma: ar hash jau įkeltas į GitHub
 
-// ── Sąrankos kodas ───────────────────────────────────────────────────────────
-// Pakeiskite į savo slaptą kodą! Jis reikalingas pirmą kartą nustatant slaptažodį.
-const SETUP_CODE        = 'IlonaNT-2026!';           // ← PAKEISKITE
-
 // ── State ───────────────────────────────────────────────────────────────────
 
 const S = {
@@ -166,20 +162,48 @@ async function showLoginScreen() {
 
 document.getElementById('setupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const code = document.getElementById('setupCode').value;
-  const p1   = document.getElementById('setupPass').value;
-  const p2   = document.getElementById('setupPass2').value;
-  const err  = document.getElementById('setupError');
-  if (code !== SETUP_CODE) { showError(err, 'Neteisingas sąrankos kodas.'); return; }
-  if (p1 !== p2)           { showError(err, 'Slaptažodžiai nesutampa.'); return; }
-  if (p1.length < 6)       { showError(err, 'Slaptažodis per trumpas (min. 6 simboliai).'); return; }
+  const owner = document.getElementById('setupOwner').value.trim();
+  const repo  = document.getElementById('setupRepo').value.trim();
+  const token = document.getElementById('setupToken').value.trim();
+  const p1    = document.getElementById('setupPass').value;
+  const p2    = document.getElementById('setupPass2').value;
+  const err   = document.getElementById('setupError');
+  const btn   = e.target.querySelector('[type=submit]');
+
+  if (!owner || !repo)   { showError(err, 'Įveskite GitHub vartotoją ir repozitorijos pavadinimą.'); return; }
+  if (!token)            { showError(err, 'Įveskite GitHub Personal Access Token.'); return; }
+  if (p1 !== p2)         { showError(err, 'Slaptažodžiai nesutampa.'); return; }
+  if (p1.length < 6)     { showError(err, 'Slaptažodis per trumpas (min. 6 simboliai).'); return; }
+
+  // Tikriname tokeną per GitHub API
+  btn.disabled = true;
+  btn.textContent = 'Tikrinama...';
+  try {
+    const check = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: { Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' }
+    });
+    if (!check.ok) {
+      showError(err, 'Neteisingas tokenas arba repozitorija nerasta. Patikrinkite duomenis.');
+      return;
+    }
+  } catch {
+    showError(err, 'Nepavyko patikrinti tokeno. Patikrinkite interneto ryšį.');
+    return;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Nustatyti slaptažodį';
+  }
+
+  // Tokenas teisingas — išsaugome konfigūraciją ir slaptažodį
+  S.ghConfig = { owner, repo, branch: 'main', token };
+  localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
+
   const hash = await hashPassword(p1);
   localStorage.setItem(PASS_KEY, hash);
   sessionStorage.setItem('ntilona_session', '1');
   hideError(err);
   await enterAdmin();
-  // Išsaugome hash į GitHub fone (jei sukonfigūruota)
-  saveHashToGitHub(hash);
+  saveHashToGitHub(hash); // išsaugome į GitHub fone
 });
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -203,14 +227,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
 document.getElementById('forgotPassLink').addEventListener('click', (e) => {
   e.preventDefault();
-  const code = prompt('Įveskite sąrankos kodą, kad galėtumėte nustatyti naują slaptažodį:');
-  if (code === null) return; // atšaukė
-  if (code !== SETUP_CODE) { alert('Neteisingas sąrankos kodas.'); return; }
   localStorage.removeItem(PASS_KEY);
   localStorage.removeItem(HASH_ON_GH_KEY);
   document.getElementById('loginForm').classList.add('hidden');
   document.getElementById('setupForm').classList.remove('hidden');
-  document.getElementById('setupCode').value = code; // užpildome automatiškai
+  // Užpildome owner/repo jei jau žinome
+  const cfg = S.ghConfig;
+  if (cfg.owner) document.getElementById('setupOwner').value = cfg.owner;
+  if (cfg.repo)  document.getElementById('setupRepo').value  = cfg.repo;
 });
 
 function doLogout() {
