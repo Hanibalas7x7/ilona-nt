@@ -11,6 +11,7 @@ const GH_KEY            = 'ntilona_gh_config';
 const LOCAL_KEY         = 'ntilona_properties_draft';
 const PENDING_KEY       = 'ntilona_pending_reviews';
 const HASH_GH_PATH      = 'admin/.pwdhash';
+const TOKEN_GH_PATH     = 'admin/.ghtoken';
 const HASH_ON_GH_KEY    = 'ntilona_hash_on_gh';
 
 // Viešos repozitorijos koordinatės – naudojamos hash nuskaitymui naujame įrenginyje
@@ -109,6 +110,37 @@ function toBase64(str) {
   return btoa(binStr);
 }
 
+// ── Token šifravimas (AES-GCM + PBKDF2) ─────────────────────────────────────
+
+async function encryptToken(password, token) {
+  const salt   = crypto.getRandomValues(new Uint8Array(16));
+  const iv     = crypto.getRandomValues(new Uint8Array(12));
+  const b64    = arr => btoa(String.fromCharCode(...new Uint8Array(arr instanceof ArrayBuffer ? arr : arr)));
+  const keyMat = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key    = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    keyMat, { name: 'AES-GCM', length: 256 }, false, ['encrypt']
+  );
+  const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(token));
+  return `${b64(salt)}:${b64(iv)}:${b64(enc)}`;
+}
+
+async function decryptToken(password, stored) {
+  const parts = (stored || '').split(':');
+  if (parts.length !== 3) return null;
+  const fromB64 = s => new Uint8Array([...atob(s)].map(c => c.charCodeAt(0)));
+  const [salt, iv, enc] = parts.map(fromB64);
+  try {
+    const keyMat = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    const key    = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+      keyMat, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
+    );
+    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, enc);
+    return new TextDecoder().decode(dec);
+  } catch { return null; }
+}
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 function isLoggedIn() {
@@ -161,6 +193,28 @@ async function saveHashToGitHub(hash) {
     localStorage.setItem(HASH_ON_GH_KEY, '1'); // pažymime: hash yra GitHub
     return true;
   } catch { return false; }
+}
+
+async function fetchEncryptedToken() {
+  const owner  = S.ghConfig.owner  || DEFAULT_GH_OWNER;
+  const repo   = S.ghConfig.repo   || DEFAULT_GH_REPO;
+  const branch = S.ghConfig.branch || DEFAULT_GH_BRANCH;
+  try {
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${TOKEN_GH_PATH}?_=${Date.now()}`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return null;
+    return (await res.text()).trim() || null;
+  } catch { return null; }
+}
+
+async function saveTokenToGitHub(password, token) {
+  if (!token) return;
+  try {
+    const encrypted = await encryptToken(password, token);
+    await ghPutFile(TOKEN_GH_PATH, encrypted, 'Admin: token sync');
+  } catch { /* silent – login still works */ }
 }
 
 async function showLoginScreen() {
@@ -219,7 +273,8 @@ document.getElementById('setupForm').addEventListener('submit', async (e) => {
   sessionStorage.setItem('ntilona_session', '1');
   hideError(err);
   await enterAdmin();
-  saveHashToGitHub(hash); // išsaugome į GitHub fone
+  saveHashToGitHub(hash);     // išsaugome į GitHub fone
+  saveTokenToGitHub(p1, token); // šifruojame token ir saugome GitHub
 });
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -239,6 +294,17 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   hideError(err);
   sessionStorage.setItem('ntilona_session', '1');
   await enterAdmin();
+  // Automatiškai nuskaitome token iš GitHub jei šiame įrenginyje jo nėra
+  if (!S.ghConfig.token) {
+    const enc = await fetchEncryptedToken();
+    if (enc) {
+      const tok = await decryptToken(pass, enc);
+      if (tok) {
+        S.ghConfig = { ...S.ghConfig, token: tok };
+        localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
+      }
+    }
+  }
 });
 
 document.getElementById('forgotPassLink').addEventListener('click', (e) => {
@@ -941,8 +1007,6 @@ function confirmDelete(id) {
 // ── Settings ────────────────────────────────────────────────────────────────
 
 function loadSettingsSection() {
-  document.getElementById('ghToken').value     = S.ghConfig.token  || '';
-  document.getElementById('ghTokenCard').classList.toggle('token-missing', !S.ghConfig.token);
   document.getElementById('chgPassOld').value  = '';
   document.getElementById('chgPassNew').value  = '';
   document.getElementById('chgPassNew2').value = '';
@@ -1099,12 +1163,7 @@ document.getElementById('btnSettings').addEventListener('click', () => {
 });
 
 document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
-  // Update token if provided
-  const newToken = document.getElementById('ghToken').value.trim();
-  if (newToken) {
-    S.ghConfig = { ...S.ghConfig, token: newToken };
-    localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
-  }
+  // Token auto-sinchronizuojamas iš GitHub po prisijungimo
 
   const phone      = document.getElementById('setPhone').value.trim();
   const email      = document.getElementById('setEmail').value.trim();
@@ -1172,6 +1231,8 @@ document.getElementById('btnChangePass').addEventListener('click', async () => {
     const newHash = await hashPassword(newPass);
     localStorage.setItem(PASS_KEY, newHash);
     await saveHashToGitHub(newHash);
+    // Token peršifruojame su nauju slaptažodžiu
+    if (S.ghConfig.token) saveTokenToGitHub(newPass, S.ghConfig.token);
     msg.textContent = '✅ Slaptažodis pakeistas.';
     msg.classList.remove('hidden');
     msg.style.color = 'var(--clr-success)';
