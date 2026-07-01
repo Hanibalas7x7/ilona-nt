@@ -941,6 +941,8 @@ function confirmDelete(id) {
 // ── Settings ────────────────────────────────────────────────────────────────
 
 function loadSettingsSection() {
+  document.getElementById('ghToken').value     = S.ghConfig.token  || '';
+  document.getElementById('ghTokenCard').classList.toggle('token-missing', !S.ghConfig.token);
   document.getElementById('chgPassOld').value  = '';
   document.getElementById('chgPassNew').value  = '';
   document.getElementById('chgPassNew2').value = '';
@@ -1097,7 +1099,12 @@ document.getElementById('btnSettings').addEventListener('click', () => {
 });
 
 document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
-  // S.ghConfig stays as set during initial setup (not editable here)
+  // Update token if provided
+  const newToken = document.getElementById('ghToken').value.trim();
+  if (newToken) {
+    S.ghConfig = { ...S.ghConfig, token: newToken };
+    localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
+  }
 
   const phone      = document.getElementById('setPhone').value.trim();
   const email      = document.getElementById('setEmail').value.trim();
