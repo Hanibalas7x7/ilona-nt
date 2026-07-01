@@ -320,11 +320,12 @@ function ghUrl() {
 }
 
 function ghHeaders() {
-  return {
-    'Authorization': `Bearer ${S.ghConfig.token}`,
+  const h = {
     'Accept': 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
   };
+  if (S.ghConfig.token) h['Authorization'] = `Bearer ${S.ghConfig.token}`;
+  return h;
 }
 
 function ghGetFile() {
@@ -982,8 +983,10 @@ function loadSettingsSection() {
 }
 
 async function ghPutFile(path, content, message) {
-  const { owner, repo } = S.ghConfig;
+  const { owner, repo, token } = S.ghConfig;
   const branch = S.ghConfig.branch || 'main';
+
+  if (!token) throw new Error('GitHub token nesuvestas nustatymuose (⚙️ → GitHub integracija)');
 
   // Always fetch fresh SHA to avoid 409 conflicts
   let sha;
