@@ -646,6 +646,62 @@ function renderTable() {
       if (this.dataset.action === 'delete') confirmDelete(id);
     });
   });
+
+  // ── Kortelės (mobilus vaizdas) ──
+  const cards = document.getElementById('propCards');
+  const catLT2 = { butas: 'Butas', namas: 'Namas', sklypas: 'Sklypas', komercinis: 'Komercinis' };
+  cards.innerHTML = rows.map(p => {
+    const status = p.status || 'active';
+    const thumb  = (p.images && p.images[0]) ? p.images[0].replace('w=900', 'w=200') : '';
+    const meta   = [esc(p.location || ''), esc(catLT2[p.category] || p.category), p.type === 'pirkti' ? 'Pardavimas' : 'Nuoma']
+                    .filter(Boolean).join(' · ');
+    return `
+      <div class="prop-card" data-id="${p.id}">
+        <div class="prop-card__top">
+          ${thumb
+            ? `<img class="prop-card__thumb" src="${esc(thumb)}" alt="" loading="lazy" />`
+            : `<div class="prop-card__thumb--empty"></div>`}
+          <div class="prop-card__info">
+            <div class="prop-card__title">${esc(p.title)}${p.new ? ' <span class="new-badge">Nauja</span>' : ''}</div>
+            <div class="prop-card__meta">${meta}</div>
+            <div class="prop-card__price">${esc(p.price)}</div>
+          </div>
+        </div>
+        <div class="prop-card__foot">
+          <select class="status-select" data-val="${status}" data-id="${p.id}" aria-label="Statusas">
+            ${Object.entries(STATUS_LT).map(([v, l]) =>
+              `<option value="${v}"${v === status ? ' selected' : ''}>${l}</option>`
+            ).join('')}
+          </select>
+          <div class="prop-card__actions">
+            <button class="btn btn-outline" data-action="edit" data-id="${p.id}">✏️ Redaguoti</button>
+            <button class="btn btn-danger" data-action="delete" data-id="${p.id}">🗑️</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Kortelių event listeners
+  cards.querySelectorAll('.status-select').forEach(sel => {
+    sel.addEventListener('change', function () {
+      const id = parseInt(this.dataset.id, 10);
+      const prop = S.properties.find(p => p.id === id);
+      if (prop) {
+        prop.status = this.value;
+        this.dataset.val = this.value;
+        saveDraft();
+        setUnsaved(true);
+        updateCounts();
+      }
+    });
+  });
+  cards.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const id = parseInt(this.dataset.id, 10);
+      if (this.dataset.action === 'edit')   openForm(id);
+      if (this.dataset.action === 'delete') confirmDelete(id);
+    });
+  });
 }
 
 function updateCounts() {

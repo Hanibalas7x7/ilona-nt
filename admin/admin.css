@@ -453,17 +453,88 @@ body {
 }
 .hint a { color: var(--clr-primary); }
 
+/* ── Property cards (mobile view) ── */
+.prop-cards { display: none; }
+
+.prop-card {
+  padding: 12px;
+  border-bottom: 1px solid var(--clr-border);
+  background: var(--clr-white);
+}
+.prop-card:last-child { border-bottom: none; }
+
+.prop-card__top {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.prop-card__thumb {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: var(--clr-bg);
+  display: block;
+}
+.prop-card__thumb--empty {
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: var(--clr-bg);
+}
+.prop-card__info { flex: 1; min-width: 0; }
+.prop-card__title {
+  font-weight: 600;
+  font-size: .88rem;
+  line-height: 1.3;
+  word-break: break-word;
+}
+.prop-card__meta {
+  font-size: .78rem;
+  color: var(--clr-muted);
+  margin-top: 3px;
+}
+.prop-card__price {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--clr-primary);
+  margin-top: 4px;
+}
+.prop-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.prop-card__foot .status-select {
+  flex: 1;
+  font-size: .82rem;
+  padding: 6px 4px;
+}
+.prop-card__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.prop-card__actions .btn {
+  font-size: .78rem;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
 /* ── Responsive ── */
 @media (max-width: 700px) {
   .form-grid { grid-template-columns: 1fr; gap: 0; }
 
   /* Header */
   .admin-header { padding: 0 12px; height: 52px; }
-  .admin-header__brand span:last-child { display: none; } /* slėpti tekstą, palikti 🏠 */
+  .admin-header__brand span:last-child { display: none; }
   .admin-header__actions { gap: 6px; }
   .admin-header #btnAdd { font-size: .8rem; padding: 6px 10px; }
-  .admin-header #btnSettings span { display: none; } /* slėpti tekstą, palikti ⚙️ */
-  .admin-header #btnLogout { display: none; } /* slėpti – naudoti atsijungimą per settings */
+  .admin-header #btnSettings span { display: none; }
+  .admin-header #btnLogout span { display: none; }
+  .admin-header #btnLogout { padding: 6px 8px; }
 
   /* Section nav */
   .section-nav { overflow-x: auto; }
@@ -472,31 +543,17 @@ body {
   /* Toolbar */
   .admin-main { padding: 12px; }
   .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
-  .filter-tabs { overflow-x: auto; white-space: nowrap; flex-wrap: nowrap; }
-  .filter-tab { font-size: .78rem; padding: 5px 10px; flex-shrink: 0; }
-  .save-bar { justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-  .save-bar .btn { font-size: .8rem; padding: 6px 10px; }
+  .filter-tabs { flex-wrap: wrap; overflow-x: visible; white-space: normal; }
+  .filter-tab { flex: 1; min-width: calc(50% - 4px); font-size: .78rem; padding: 6px 6px; justify-content: center; }
+  .save-bar { flex-direction: column; gap: 6px; }
+  .save-bar .btn { width: 100%; justify-content: center; font-size: .85rem; }
+  #unsavedBadge { text-align: center; }
 
-  /* Table – slėpti mažiau svarbius stulpelius */
-  .prop-table th:nth-child(1),
-  .prop-table td:nth-child(1) { display: none; } /* Nr */
-  .prop-table th:nth-child(4),
-  .prop-table td:nth-child(4) { display: none; } /* Tipas */
-  .prop-table th:nth-child(5),
-  .prop-table td:nth-child(5) { display: none; } /* Kaina */
+  /* Desktop table – slėpti mobiliame */
+  .prop-table { display: none; }
 
-  /* Fiksuoti stulpelių pločiai, kad viskas tilptų ekrane */
-  .prop-table { table-layout: fixed; width: 100%; }
-  .prop-table th:nth-child(2), .prop-table td:nth-child(2) { width: 50px !important; }
-  .prop-table th:nth-child(6), .prop-table td:nth-child(6) { width: 86px !important; }
-  .prop-table th:nth-child(7), .prop-table td:nth-child(7) { width: 58px !important; }
-
-  .prop-table th, .prop-table td { padding: 7px 4px; font-size: .8rem; }
-  .prop-title { font-size: .8rem; white-space: normal; word-break: break-word; }
-  .prop-thumb { width: 42px; height: 32px; }
-  .status-select { font-size: .7rem; padding: 3px 1px; width: 100%; }
-  .btn-icon { font-size: .85rem; width: 24px; height: 24px; }
-  .row-actions { gap: 2px; flex-direction: column; align-items: center; }
+  /* Kortelių išdėstymas mobiliame */
+  .prop-cards { display: block; }
 }
 
 /* ── Image manager ── */
