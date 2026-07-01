@@ -213,12 +213,14 @@ document.getElementById('forgotPassLink').addEventListener('click', (e) => {
   document.getElementById('setupCode').value = code; // užpildome automatiškai
 });
 
-document.getElementById('btnLogout').addEventListener('click', () => {
+function doLogout() {
   if (!S.unsaved || confirm('Yra neišsaugotų pakeitimų. Atsijungti?')) {
     sessionStorage.removeItem('ntilona_session');
     location.reload();
   }
-});
+}
+document.getElementById('btnLogout').addEventListener('click', doLogout);
+document.getElementById('btnLogoutSettings').addEventListener('click', doLogout);
 
 // ── Enter admin ───────────────────────────────────────────────────────────────
 

@@ -452,10 +452,40 @@ body {
 /* ── Responsive ── */
 @media (max-width: 700px) {
   .form-grid { grid-template-columns: 1fr; gap: 0; }
-  .admin-header { padding: 0 14px; }
-  .admin-main { padding: 16px 12px; }
-  .toolbar { flex-direction: column; align-items: stretch; }
-  .save-bar { justify-content: flex-end; }
+
+  /* Header */
+  .admin-header { padding: 0 12px; height: 52px; }
+  .admin-header__brand span:last-child { display: none; } /* slėpti tekstą, palikti 🏠 */
+  .admin-header__actions { gap: 6px; }
+  .admin-header #btnAdd { font-size: .8rem; padding: 6px 10px; }
+  .admin-header #btnSettings span { display: none; } /* slėpti tekstą, palikti ⚙️ */
+  .admin-header #btnLogout { display: none; } /* slėpti – naudoti atsijungimą per settings */
+
+  /* Section nav */
+  .section-nav { overflow-x: auto; }
+  .section-nav__btn { font-size: .82rem; padding: 10px 14px; white-space: nowrap; }
+
+  /* Toolbar */
+  .admin-main { padding: 12px; }
+  .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .filter-tabs { overflow-x: auto; white-space: nowrap; flex-wrap: nowrap; }
+  .filter-tab { font-size: .78rem; padding: 5px 10px; flex-shrink: 0; }
+  .save-bar { justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
+  .save-bar .btn { font-size: .8rem; padding: 6px 10px; }
+
+  /* Table – slėpti mažiau svarbius stulpelius */
+  .prop-table th:nth-child(1),
+  .prop-table td:nth-child(1) { display: none; } /* Nr */
+  .prop-table th:nth-child(4),
+  .prop-table td:nth-child(4) { display: none; } /* Tipas */
+  .prop-table th:nth-child(5),
+  .prop-table td:nth-child(5) { display: none; } /* Kaina */
+  .prop-table th, .prop-table td { padding: 8px 6px; font-size: .82rem; }
+  .prop-thumb { width: 44px; height: 34px; }
+  .prop-title { font-size: .85rem; }
+  .status-select { font-size: .75rem; padding: 4px 2px; min-width: 80px; }
+  .btn-icon { font-size: .95rem; width: 28px; height: 28px; }
+  .row-actions { gap: 2px; }
 }
 
 /* ── Image manager ── */
