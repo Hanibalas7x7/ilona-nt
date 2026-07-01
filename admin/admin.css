@@ -210,6 +210,10 @@ body {
   min-width: 640px;
 }
 
+@media (max-width: 700px) {
+  .prop-table { min-width: 0; }
+}
+
 .prop-table th,
 .prop-table td {
   padding: 12px 14px;
@@ -480,13 +484,19 @@ body {
   .prop-table td:nth-child(4) { display: none; } /* Tipas */
   .prop-table th:nth-child(5),
   .prop-table td:nth-child(5) { display: none; } /* Kaina */
-  .prop-table th, .prop-table td { padding: 8px 5px; font-size: .82rem; }
-  .prop-table td:nth-child(3) { max-width: 130px; min-width: 0; }
-  .prop-title { font-size: .82rem; white-space: normal; word-break: break-word; }
-  .prop-thumb { width: 44px; height: 34px; }
-  .status-select { font-size: .72rem; padding: 3px 2px; min-width: 0; width: 90px; }
-  .btn-icon { font-size: .9rem; width: 26px; height: 26px; }
-  .row-actions { gap: 2px; flex-direction: column; }
+
+  /* Fiksuoti stulpelių pločiai, kad viskas tilptų ekrane */
+  .prop-table { table-layout: fixed; width: 100%; }
+  .prop-table th:nth-child(2), .prop-table td:nth-child(2) { width: 50px !important; }
+  .prop-table th:nth-child(6), .prop-table td:nth-child(6) { width: 86px !important; }
+  .prop-table th:nth-child(7), .prop-table td:nth-child(7) { width: 58px !important; }
+
+  .prop-table th, .prop-table td { padding: 7px 4px; font-size: .8rem; }
+  .prop-title { font-size: .8rem; white-space: normal; word-break: break-word; }
+  .prop-thumb { width: 42px; height: 32px; }
+  .status-select { font-size: .7rem; padding: 3px 1px; width: 100%; }
+  .btn-icon { font-size: .85rem; width: 24px; height: 24px; }
+  .row-actions { gap: 2px; flex-direction: column; align-items: center; }
 }
 
 /* ── Image manager ── */
