@@ -342,7 +342,7 @@
     "condition": "Normali",
     "equipment": "Pilnas įrengimas",
     "desc": "Gražus butukas",
-    "new": false,
+    "new": true,
     "images": [
       "images/objnew-1782942471559/1.jpg"
     ]
