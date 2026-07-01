@@ -11,6 +11,7 @@ const GH_KEY            = 'ntilona_gh_config';
 const LOCAL_KEY         = 'ntilona_properties_draft';
 const PENDING_KEY       = 'ntilona_pending_reviews';
 const HASH_GH_PATH      = 'admin/.pwdhash';          // slaptažodžio hash GitHub repozitorijoje
+const HASH_ON_GH_KEY    = 'ntilona_hash_on_gh';      // žyma: ar hash jau įkeltas į GitHub
 
 // ── Sąrankos kodas ───────────────────────────────────────────────────────────
 // Pakeiskite į savo slaptą kodą! Jis reikalingas pirmą kartą nustatant slaptažodį.
@@ -108,8 +109,9 @@ function isLoggedIn() {
   return sessionStorage.getItem('ntilona_session') === '1';
 }
 
-// Gauna slaptažodžio hash iš GitHub (public repo, be tokeno)
+// Gauna slaptažodžio hash iš GitHub – tik jei žinome, kad jis ten yra
 async function fetchHashFromGitHub() {
+  if (!localStorage.getItem(HASH_ON_GH_KEY)) return null; // failas dar neįkeltas – neklausiame
   const cfg = S.ghConfig;
   if (!cfg.owner || !cfg.repo) return null;
   try {
@@ -148,6 +150,7 @@ async function saveHashToGitHub(hash) {
         }),
       }
     );
+    localStorage.setItem(HASH_ON_GH_KEY, '1'); // pažymime: hash yra GitHub
   } catch { /* nekritinė klaida – hash jau yra localStorage */ }
 }
 
@@ -204,6 +207,7 @@ document.getElementById('forgotPassLink').addEventListener('click', (e) => {
   if (code === null) return; // atšaukė
   if (code !== SETUP_CODE) { alert('Neteisingas sąrankos kodas.'); return; }
   localStorage.removeItem(PASS_KEY);
+  localStorage.removeItem(HASH_ON_GH_KEY);
   document.getElementById('loginForm').classList.add('hidden');
   document.getElementById('setupForm').classList.remove('hidden');
   document.getElementById('setupCode').value = code; // užpildome automatiškai
