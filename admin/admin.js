@@ -981,54 +981,50 @@ function loadSettingsSection() {
   }
 }
 
-async function saveContactToGitHub(contact) {
-  const { owner, repo, token } = S.ghConfig;
+async function ghPutFile(path, content, message) {
+  const { owner, repo } = S.ghConfig;
   const branch = S.ghConfig.branch || 'main';
+
+  // Always fetch fresh SHA to avoid 409 conflicts
   let sha;
   try {
-    const getRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${CONTACT_PATH}?ref=${branch}`,
-      { headers: ghHeaders() }
+    const r = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
+      { headers: ghHeaders(), cache: 'no-store' }
     );
-    if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+    if (r.ok) { const d = await r.json(); sha = d.sha; }
   } catch { /* new file */ }
 
-  const body = {
-    message: 'Admin: atnaujinti kontaktai',
-    content: toBase64(JSON.stringify(contact, null, 2)),
-    branch,
-    ...(sha ? { sha } : {}),
-  };
-  const putRes = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/contents/${CONTACT_PATH}`,
+  const body = { message, content: toBase64(content), branch, ...(sha ? { sha } : {}) };
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
     { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
   );
-  if (!putRes.ok) { const e = await putRes.json(); throw new Error(e.message || putRes.statusText); }
+
+  // On conflict, retry once with fresh SHA
+  if (res.status === 409) {
+    const r2 = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
+      { headers: ghHeaders(), cache: 'no-store' }
+    );
+    const freshSha = r2.ok ? (await r2.json()).sha : undefined;
+    const body2 = { message, content: toBase64(content), branch, ...(freshSha ? { sha: freshSha } : {}) };
+    const res2 = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body2) }
+    );
+    if (!res2.ok) { const e = await res2.json(); throw new Error(e.message || res2.statusText); }
+    return;
+  }
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
+}
+
+async function saveContactToGitHub(contact) {
+  await ghPutFile(CONTACT_PATH, JSON.stringify(contact, null, 2), 'Admin: atnaujinti kontaktai');
 }
 
 async function saveAboutToGitHub(about) {
-  const { owner, repo } = S.ghConfig;
-  const branch = S.ghConfig.branch || 'main';
-  let sha;
-  try {
-    const getRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${ABOUT_PATH}?ref=${branch}`,
-      { headers: ghHeaders() }
-    );
-    if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
-  } catch { /* new file */ }
-
-  const body = {
-    message: 'Admin: atnaujinta "Apie mane"',
-    content: toBase64(JSON.stringify(about, null, 2)),
-    branch,
-    ...(sha ? { sha } : {}),
-  };
-  const putRes = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/contents/${ABOUT_PATH}`,
-    { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
-  if (!putRes.ok) { const e = await putRes.json(); throw new Error(e.message || putRes.statusText); }
+  await ghPutFile(ABOUT_PATH, JSON.stringify(about, null, 2), 'Admin: atnaujinta "Apie mane"');
 }
 
 async function uploadAboutPhoto(file) {
@@ -1109,7 +1105,7 @@ document.getElementById('settingsSaveBtn').addEventListener('click', async () =>
     owner:  document.getElementById('ghOwner').value.trim(),
     repo:   document.getElementById('ghRepo').value.trim(),
     branch: document.getElementById('ghBranch').value.trim() || 'main',
-    token:  document.getElementById('ghToken').value.trim(),
+    token:  document.getElementById('ghToken').value.trim() || S.ghConfig.token,
   };
   localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
 
