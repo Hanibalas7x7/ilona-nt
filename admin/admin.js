@@ -698,6 +698,33 @@ function nextId() {
 
 // ── Delete ────────────────────────────────────────────────────────────────────
 
+async function deleteFileFromGitHub(path) {
+  const { owner, repo, branch, token } = S.ghConfig;
+  if (!owner || !repo || !token) return;
+  try {
+    const check = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      { headers: ghHeaders() }
+    );
+    if (!check.ok) return; // file doesn't exist – skip
+    const { sha } = await check.json();
+    await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      {
+        method: 'DELETE',
+        headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `Admin: ištrinta nuotrauka ${path}`, sha, branch: branch || 'main' }),
+      }
+    );
+  } catch { /* ignoruojame klaidas atskirų failų trynimui */ }
+}
+
+async function deletePropertyImages(images) {
+  if (!images || !images.length) return;
+  const ghImages = images.filter(u => u && !u.startsWith('http'));
+  await Promise.all(ghImages.map(path => deleteFileFromGitHub(path)));
+}
+
 function confirmDelete(id) {
   const prop = S.properties.find(p => p.id === id);
   if (!prop) return;
@@ -712,7 +739,8 @@ function confirmDelete(id) {
     btnNo.removeEventListener('click', onNo);
   };
 
-  const onYes = () => {
+  const onYes = async () => {
+    const prop = S.properties.find(p => p.id === id);
     S.properties = S.properties.filter(p => p.id !== id);
     saveDraft();
     setUnsaved(true);
@@ -720,6 +748,8 @@ function confirmDelete(id) {
     updateCounts();
     closeModal('confirmModal');
     cleanup();
+    // Trinti nuotraukas iš GitHub fone (nekliudo pagrindiniam srautui)
+    if (prop && prop.images) deletePropertyImages(prop.images);
   };
 
   const onNo = () => { closeModal('confirmModal'); cleanup(); };
