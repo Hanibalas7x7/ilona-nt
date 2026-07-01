@@ -198,6 +198,17 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   await enterAdmin();
 });
 
+document.getElementById('forgotPassLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  const code = prompt('Įveskite sąrankos kodą, kad galėtumėte nustatyti naują slaptažodį:');
+  if (code === null) return; // atšaukė
+  if (code !== SETUP_CODE) { alert('Neteisingas sąrankos kodas.'); return; }
+  localStorage.removeItem(PASS_KEY);
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('setupForm').classList.remove('hidden');
+  document.getElementById('setupCode').value = code; // užpildome automatiškai
+});
+
 document.getElementById('btnLogout').addEventListener('click', () => {
   if (!S.unsaved || confirm('Yra neišsaugotų pakeitimų. Atsijungti?')) {
     sessionStorage.removeItem('ntilona_session');
