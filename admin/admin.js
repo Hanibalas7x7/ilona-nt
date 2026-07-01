@@ -905,10 +905,12 @@ document.getElementById('settingsClose').addEventListener('click', () => closeMo
 document.getElementById('btnChangePass').addEventListener('click', async () => {
   const oldPass  = document.getElementById('chgPassOld').value;
   const newPass  = document.getElementById('chgPassNew').value;
+  const newPass2 = document.getElementById('chgPassNew2').value;
   const msg      = document.getElementById('chgPassMsg');
   const btn      = document.getElementById('btnChangePass');
 
-  if (!oldPass || !newPass) { showError(msg, 'Užpildykite abu laukus.'); return; }
+  if (!oldPass || !newPass || !newPass2) { showError(msg, 'Užpildykite visus laukus.'); return; }
+  if (newPass !== newPass2)  { showError(msg, 'Nauji slaptažodžiai nesutampa.'); return; }
   if (newPass.length < 6)   { showError(msg, 'Naujas slaptažodis per trumpas (min. 6).'); return; }
   if (newPass === oldPass)   { showError(msg, 'Naujas slaptažodis negali sutapti su senu.'); return; }
 
@@ -929,6 +931,7 @@ document.getElementById('btnChangePass').addEventListener('click', async () => {
     msg.style.color = 'var(--clr-success)';
     document.getElementById('chgPassOld').value = '';
     document.getElementById('chgPassNew').value = '';
+    document.getElementById('chgPassNew2').value = '';
   } finally {
     btn.disabled = false;
     btn.textContent = 'Keisti slaptažodį';
