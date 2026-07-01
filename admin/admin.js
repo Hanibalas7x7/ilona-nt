@@ -10,8 +10,13 @@ const PASS_KEY          = 'ntilona_admin_hash';
 const GH_KEY            = 'ntilona_gh_config';
 const LOCAL_KEY         = 'ntilona_properties_draft';
 const PENDING_KEY       = 'ntilona_pending_reviews';
-const HASH_GH_PATH      = 'admin/.pwdhash';          // slaptažodžio hash GitHub repozitorijoje
-const HASH_ON_GH_KEY    = 'ntilona_hash_on_gh';      // žyma: ar hash jau įkeltas į GitHub
+const HASH_GH_PATH      = 'admin/.pwdhash';
+const HASH_ON_GH_KEY    = 'ntilona_hash_on_gh';
+
+// Viešos repozitorijos koordinatės – naudojamos hash nuskaitymui naujame įrenginyje
+const DEFAULT_GH_OWNER  = 'Hanibalas7x7';
+const DEFAULT_GH_REPO   = 'ilona-nt';
+const DEFAULT_GH_BRANCH = 'main';
 
 // ── State ───────────────────────────────────────────────────────────────────
 
@@ -107,13 +112,18 @@ function isLoggedIn() {
 
 // Gauna slaptažodžio hash iš GitHub – tik jei žinome, kad jis ten yra
 async function fetchHashFromGitHub() {
-  if (!localStorage.getItem(HASH_ON_GH_KEY)) return null; // failas dar neįkeltas – neklausiame
+  // Bandome gauti hash kai: a) žinome kad jis yra GitHub, arba b) localStorage tuščias (naujas įrenginys)
+  const flagSet = !!localStorage.getItem(HASH_ON_GH_KEY);
+  const localEmpty = !localStorage.getItem(PASS_KEY);
+  if (!flagSet && !localEmpty) return null;
+
   const cfg = S.ghConfig;
-  if (!cfg.owner || !cfg.repo) return null;
+  const owner  = cfg.owner  || DEFAULT_GH_OWNER;
+  const repo   = cfg.repo   || DEFAULT_GH_REPO;
+  const branch = cfg.branch || DEFAULT_GH_BRANCH;
   try {
-    const branch = cfg.branch || 'main';
     const res = await fetch(
-      `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${branch}/${HASH_GH_PATH}`,
+      `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${HASH_GH_PATH}`,
       { cache: 'no-store' }
     );
     if (!res.ok) return null;
