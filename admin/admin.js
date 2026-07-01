@@ -941,10 +941,6 @@ function confirmDelete(id) {
 // ── Settings ────────────────────────────────────────────────────────────────
 
 function loadSettingsSection() {
-  document.getElementById('ghOwner').value  = S.ghConfig.owner  || '';
-  document.getElementById('ghRepo').value   = S.ghConfig.repo   || '';
-  document.getElementById('ghBranch').value = S.ghConfig.branch || 'main';
-  document.getElementById('ghToken').value  = S.ghConfig.token  || '';
   document.getElementById('chgPassOld').value  = '';
   document.getElementById('chgPassNew').value  = '';
   document.getElementById('chgPassNew2').value = '';
@@ -1101,13 +1097,7 @@ document.getElementById('btnSettings').addEventListener('click', () => {
 });
 
 document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
-  S.ghConfig = {
-    owner:  document.getElementById('ghOwner').value.trim(),
-    repo:   document.getElementById('ghRepo').value.trim(),
-    branch: document.getElementById('ghBranch').value.trim() || 'main',
-    token:  document.getElementById('ghToken').value.trim() || S.ghConfig.token,
-  };
-  localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
+  // S.ghConfig stays as set during initial setup (not editable here)
 
   const phone      = document.getElementById('setPhone').value.trim();
   const email      = document.getElementById('setEmail').value.trim();
