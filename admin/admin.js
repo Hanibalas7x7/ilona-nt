@@ -125,7 +125,7 @@ async function fetchHashFromGitHub() {
 // Išsaugo hash į GitHub
 async function saveHashToGitHub(hash) {
   const { owner, repo, branch, token } = S.ghConfig;
-  if (!owner || !repo || !token) return;
+  if (!owner || !repo || !token) return false;
   try {
     let sha;
     const check = await fetch(
@@ -133,7 +133,7 @@ async function saveHashToGitHub(hash) {
       { headers: ghHeaders() }
     );
     if (check.ok) sha = (await check.json()).sha;
-    await fetch(
+    const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/${HASH_GH_PATH}`,
       {
         method: 'PUT',
@@ -146,14 +146,18 @@ async function saveHashToGitHub(hash) {
         }),
       }
     );
+    if (!res.ok) return false;
     localStorage.setItem(HASH_ON_GH_KEY, '1'); // pažymime: hash yra GitHub
-  } catch { /* nekritinė klaida – hash jau yra localStorage */ }
+    return true;
+  } catch { return false; }
 }
 
 async function showLoginScreen() {
-  // Bandome gauti hash iš GitHub (jei sukonfigūruota)
-  const ghHash = await fetchHashFromGitHub();
-  if (ghHash) localStorage.setItem(PASS_KEY, ghHash);
+  // GitHub hash naudojamas TIK jei localStorage tuščias (naujas įrenginys)
+  if (!localStorage.getItem(PASS_KEY)) {
+    const ghHash = await fetchHashFromGitHub();
+    if (ghHash) localStorage.setItem(PASS_KEY, ghHash);
+  }
 
   const hasHash = !!localStorage.getItem(PASS_KEY);
   document.getElementById('setupForm').classList.toggle('hidden', hasHash);
@@ -899,22 +903,36 @@ document.getElementById('settingsCancelBtn').addEventListener('click', () => clo
 document.getElementById('settingsClose').addEventListener('click', () => closeModal('settingsModal'));
 
 document.getElementById('btnChangePass').addEventListener('click', async () => {
-  const oldPass = document.getElementById('chgPassOld').value;
-  const newPass = document.getElementById('chgPassNew').value;
-  const msg     = document.getElementById('chgPassMsg');
+  const oldPass  = document.getElementById('chgPassOld').value;
+  const newPass  = document.getElementById('chgPassNew').value;
+  const msg      = document.getElementById('chgPassMsg');
+  const btn      = document.getElementById('btnChangePass');
 
   if (!oldPass || !newPass) { showError(msg, 'Užpildykite abu laukus.'); return; }
   if (newPass.length < 6)   { showError(msg, 'Naujas slaptažodis per trumpas (min. 6).'); return; }
-  const stored = localStorage.getItem(PASS_KEY);
-  if (!(await verifyPassword(oldPass, stored))) { showError(msg, 'Dabartinis slaptažodis neteisingas.'); return; }
-  const newHash = await hashPassword(newPass);
-  localStorage.setItem(PASS_KEY, newHash);
-  saveHashToGitHub(newHash);
-  msg.textContent = '✅ Slaptažodis pakeistas.';
-  msg.classList.remove('hidden');
-  msg.style.color = 'var(--clr-success)';
-  document.getElementById('chgPassOld').value = '';
-  document.getElementById('chgPassNew').value = '';
+  if (newPass === oldPass)   { showError(msg, 'Naujas slaptažodis negali sutapti su senu.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Tikrinama...';
+  try {
+    const stored = localStorage.getItem(PASS_KEY);
+    if (!(await verifyPassword(oldPass, stored))) {
+      showError(msg, 'Dabartinis slaptažodis neteisingas.');
+      return;
+    }
+    btn.textContent = 'Saugoma...';
+    const newHash = await hashPassword(newPass);
+    localStorage.setItem(PASS_KEY, newHash);
+    await saveHashToGitHub(newHash);
+    msg.textContent = '✅ Slaptažodis pakeistas.';
+    msg.classList.remove('hidden');
+    msg.style.color = 'var(--clr-success)';
+    document.getElementById('chgPassOld').value = '';
+    document.getElementById('chgPassNew').value = '';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Keisti slaptažodį';
+  }
 });
 
 // ── Save / Export buttons ─────────────────────────────────────────────────────
