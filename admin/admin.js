@@ -988,38 +988,35 @@ async function ghPutFile(path, content, message) {
 
   if (!token) throw new Error('GitHub token nesuvestas nustatymuose (⚙️ → GitHub integracija)');
 
-  // Always fetch fresh SHA to avoid 409 conflicts
-  let sha;
-  try {
-    const r = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
-      { headers: ghHeaders(), cache: 'no-store' }
-    );
-    if (r.ok) { const d = await r.json(); sha = d.sha; }
-  } catch { /* new file */ }
+  const fileUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const hdrs = { ...ghHeaders(), 'Content-Type': 'application/json' };
 
-  const body = { message, content: toBase64(content), branch, ...(sha ? { sha } : {}) };
-  const res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-    { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
+  const fetchSha = async () => {
+    const r = await fetch(`${fileUrl}?ref=${branch}&_=${Date.now()}`, { headers: ghHeaders() });
+    if (r.ok) { const d = await r.json(); return d.sha; }
+    const txt = await r.text().catch(() => r.status);
+    console.warn('ghPutFile: SHA fetch failed', r.status, txt);
+    return undefined;
+  };
 
-  // On conflict, retry once with fresh SHA
-  if (res.status === 409) {
-    const r2 = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
-      { headers: ghHeaders(), cache: 'no-store' }
-    );
-    const freshSha = r2.ok ? (await r2.json()).sha : undefined;
-    const body2 = { message, content: toBase64(content), branch, ...(freshSha ? { sha: freshSha } : {}) };
-    const res2 = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body2) }
-    );
-    if (!res2.ok) { const e = await res2.json(); throw new Error(e.message || res2.statusText); }
-    return;
+  const doPut = async (sha) => {
+    const body = { message, content: toBase64(content), branch, ...(sha ? { sha } : {}) };
+    return fetch(fileUrl, { method: 'PUT', headers: hdrs, body: JSON.stringify(body) });
+  };
+
+  let sha = await fetchSha();
+  let res = await doPut(sha);
+
+  if (res.status === 409 || res.status === 422) {
+    // Retry with a fresh SHA
+    sha = await fetchSha();
+    res = await doPut(sha);
   }
-  if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
+
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(`GitHub ${res.status}: ${e.message || res.statusText}`);
+  }
 }
 
 async function saveContactToGitHub(contact) {
@@ -1140,10 +1137,8 @@ document.getElementById('settingsSaveBtn').addEventListener('click', async () =>
     btn.disabled = true;
     btn.textContent = '⏳ Saugoma...';
     try {
-      await Promise.all([
-        saveContactToGitHub(contact),
-        saveAboutToGitHub(about),
-      ]);
+      await saveContactToGitHub(contact);
+      await saveAboutToGitHub(about);
       showMsg('✅ Nustatymai išsaugoti ir atnaujinti GitHub.', 'success');
     } catch (e) {
       showMsg('❌ GitHub klaida: ' + e.message, 'error');
