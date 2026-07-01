@@ -946,6 +946,8 @@ input, select, textarea {
 .review-success__icon { font-size: 3rem; margin-bottom: 12px; }
 .review-success h4     { font-size: 1.2rem; margin: 0 0 8px; }
 .review-success p      { color: #666; margin: 0; }
+
+.testimonial-dots {
   display: flex;
   justify-content: center;
   gap: 8px;

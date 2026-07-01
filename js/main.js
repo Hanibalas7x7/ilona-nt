@@ -978,7 +978,11 @@ function initReviewForm() {
     localStorage.setItem('ntilona_pending_reviews', JSON.stringify(pending));
 
     document.getElementById('reviewFormWrap').classList.add('hidden');
-    document.getElementById('reviewSuccess').classList.remove('hidden');
+    const successEl = document.getElementById('reviewSuccess');
+    successEl.classList.remove('hidden');
+    // Auto-close after 4 s
+    const autoClose = setTimeout(() => closeReview(), 4000);
+    document.getElementById('reviewSuccessClose').onclick = () => { clearTimeout(autoClose); closeReview(); };
   });
 }
 
