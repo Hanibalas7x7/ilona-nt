@@ -27,11 +27,46 @@ const S = {
 // Image manager state
 let formImages = []; // { url: string, preview?: string, uploading?: boolean }
 
-// ── SHA-256 ──────────────────────────────────────────────────────────────────
+// ── Slaptažodžio maišos funkcijos (PBKDF2 + druska) ─────────────────────────
 
-async function sha256(str) {
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+async function hashPassword(password, saltB64 = null) {
+  const enc = new TextEncoder();
+  if (!saltB64) {
+    const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+    saltB64 = btoa(String.fromCharCode(...saltBytes));
+  }
+  const saltBytes = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: saltBytes, iterations: 150000, hash: 'SHA-256' },
+    key, 256
+  );
+  const hashB64 = btoa(String.fromCharCode(...new Uint8Array(bits)));
+  return `${saltB64}:${hashB64}`;
+}
+
+async function verifyPassword(password, stored) {
+  if (!stored || !stored.includes(':')) return false; // senasis formatas
+  const [saltB64] = stored.split(':');
+  const computed = await hashPassword(password, saltB64);
+  return computed === stored;
+}
+
+// Brute-force apsauga
+const _loginAttempts = { count: 0, lockedUntil: 0 };
+function checkLoginThrottle() {
+  if (Date.now() < _loginAttempts.lockedUntil) {
+    const sek = Math.ceil((_loginAttempts.lockedUntil - Date.now()) / 1000);
+    return `Per daug bandymų. Palaukite ${sek}s.`;
+  }
+  return null;
+}
+function recordFailedLogin() {
+  _loginAttempts.count++;
+  if (_loginAttempts.count >= 5) {
+    _loginAttempts.lockedUntil = Date.now() + 30000; // 30s
+    _loginAttempts.count = 0;
+  }
 }
 
 // ── UTF-8 saugus base64 kodavimas (GitHub API) ───────────────────────────────
@@ -61,7 +96,7 @@ document.getElementById('setupForm').addEventListener('submit', async (e) => {
   const err = document.getElementById('setupError');
   if (p1 !== p2) { showError(err, 'Slaptažodžiai nesutampa.'); return; }
   if (p1.length < 6) { showError(err, 'Slaptažodis per trumpas (min. 6 simboliai).'); return; }
-  localStorage.setItem(PASS_KEY, await sha256(p1));
+  localStorage.setItem(PASS_KEY, await hashPassword(p1));
   sessionStorage.setItem('ntilona_session', '1');
   hideError(err);
   await enterAdmin();
@@ -71,8 +106,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const pass = document.getElementById('loginPass').value;
   const err  = document.getElementById('loginError');
-  const hash = await sha256(pass);
-  if (hash !== localStorage.getItem(PASS_KEY)) {
+  const throttle = checkLoginThrottle();
+  if (throttle) { showError(err, throttle); return; }
+  const stored = localStorage.getItem(PASS_KEY);
+  const ok = stored && await verifyPassword(pass, stored);
+  if (!ok) {
+    recordFailedLogin();
     showError(err, 'Neteisingas slaptažodis.');
     document.getElementById('loginPass').value = '';
     return;
@@ -688,9 +727,9 @@ document.getElementById('btnChangePass').addEventListener('click', async () => {
 
   if (!oldPass || !newPass) { showError(msg, 'Užpildykite abu laukus.'); return; }
   if (newPass.length < 6)   { showError(msg, 'Naujas slaptažodis per trumpas (min. 6).'); return; }
-  const oldHash = await sha256(oldPass);
-  if (oldHash !== localStorage.getItem(PASS_KEY)) { showError(msg, 'Dabartinis slaptažodis neteisingas.'); return; }
-  localStorage.setItem(PASS_KEY, await sha256(newPass));
+  const stored = localStorage.getItem(PASS_KEY);
+  if (!(await verifyPassword(oldPass, stored))) { showError(msg, 'Dabartinis slaptažodis neteisingas.'); return; }
+  localStorage.setItem(PASS_KEY, await hashPassword(newPass));
   msg.textContent = '✅ Slaptažodis pakeistas.';
   msg.classList.remove('hidden');
   msg.style.color = 'var(--clr-success)';
