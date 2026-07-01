@@ -480,12 +480,13 @@ body {
   .prop-table td:nth-child(4) { display: none; } /* Tipas */
   .prop-table th:nth-child(5),
   .prop-table td:nth-child(5) { display: none; } /* Kaina */
-  .prop-table th, .prop-table td { padding: 8px 6px; font-size: .82rem; }
+  .prop-table th, .prop-table td { padding: 8px 5px; font-size: .82rem; }
+  .prop-table td:nth-child(3) { max-width: 130px; min-width: 0; }
+  .prop-title { font-size: .82rem; white-space: normal; word-break: break-word; }
   .prop-thumb { width: 44px; height: 34px; }
-  .prop-title { font-size: .85rem; }
-  .status-select { font-size: .75rem; padding: 4px 2px; min-width: 80px; }
-  .btn-icon { font-size: .95rem; width: 28px; height: 28px; }
-  .row-actions { gap: 2px; }
+  .status-select { font-size: .72rem; padding: 3px 2px; min-width: 0; width: 90px; }
+  .btn-icon { font-size: .9rem; width: 26px; height: 26px; }
+  .row-actions { gap: 2px; flex-direction: column; }
 }
 
 /* ── Image manager ── */
