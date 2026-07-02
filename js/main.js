@@ -223,7 +223,7 @@ const FALLBACK_PROPERTIES = [
 
 async function loadData() {
   try {
-    const res = await fetch('data/properties.json');
+    const res = await fetch('data/properties.json?v=' + Date.now(), { cache: 'no-cache' });
     if (!res.ok) throw new Error('fetch failed');
     PROPERTIES = await res.json();
   } catch {
@@ -874,7 +874,7 @@ let TESTIMONIALS = [];
 
 async function loadTestimonials() {
   try {
-    const res = await fetch('data/testimonials.json');
+    const res = await fetch('data/testimonials.json?v=' + Date.now(), { cache: 'no-cache' });
     if (!res.ok) throw new Error();
     TESTIMONIALS = (await res.json()).filter(t => t.status === 'approved');
   } catch {
