@@ -982,7 +982,9 @@ async function deleteFileFromGitHub(path) {
 async function deletePropertyImages(images) {
   if (!images || !images.length) return;
   const ghImages = images.filter(u => u && !u.startsWith('http'));
-  await Promise.all(ghImages.map(path => deleteFileFromGitHub(path)));
+  for (const path of ghImages) {
+    await deleteFileFromGitHub(path);
+  }
 }
 
 function confirmDelete(id) {
