@@ -271,10 +271,11 @@ document.getElementById('setupForm').addEventListener('submit', async (e) => {
   const hash = await hashPassword(p1);
   localStorage.setItem(PASS_KEY, hash);
   sessionStorage.setItem('ntilona_session', '1');
+  sessionStorage.setItem('ntilona_hash_snap', localStorage.getItem(PASS_KEY) || '');
   hideError(err);
   await enterAdmin();
-  saveHashToGitHub(hash);     // išsaugome į GitHub fone
-  saveTokenToGitHub(p1, token); // šifruojame token ir saugome GitHub
+  saveHashToGitHub(hash);
+  saveTokenToGitHub(p1, token);
 });
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -293,6 +294,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   }
   hideError(err);
   sessionStorage.setItem('ntilona_session', '1');
+  sessionStorage.setItem('ntilona_hash_snap', stored);
   await enterAdmin();
   // Token sinchronizacija su GitHub
   const encOnGh = await fetchEncryptedToken();
@@ -343,6 +345,17 @@ async function enterAdmin() {
   updateCounts();
   renderReviewsSection();
   initSectionNav();
+
+  // Kas 60s tikriname ar slaptažodis nepasikeitė kitame įrenginyje
+  setInterval(async () => {
+    if (!isLoggedIn()) return;
+    const ghHash = await fetchHashFromGitHub();
+    if (ghHash && ghHash !== sessionStorage.getItem('ntilona_hash_snap')) {
+      sessionStorage.clear();
+      alert('Slaptažodis buvo pakeistas. Prisijunkite iš naujo.');
+      location.reload();
+    }
+  }, 60000);
 }
 
 // ── Load properties ───────────────────────────────────────────────────────────
