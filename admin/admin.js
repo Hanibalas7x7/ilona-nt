@@ -300,7 +300,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // Naujas įrenginys: iššifruojame ir įkeliame token
     const tok = await decryptToken(pass, encOnGh);
     if (tok) {
-      S.ghConfig = { ...S.ghConfig, token: tok };
+      S.ghConfig = {
+        owner:  S.ghConfig.owner  || DEFAULT_GH_OWNER,
+        repo:   S.ghConfig.repo   || DEFAULT_GH_REPO,
+        branch: S.ghConfig.branch || DEFAULT_GH_BRANCH,
+        token:  tok,
+      };
       localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
     }
   } else if (S.ghConfig.token && !encOnGh) {
@@ -327,6 +332,10 @@ async function enterAdmin() {
   // Load GitHub config
   const stored = localStorage.getItem(GH_KEY);
   if (stored) S.ghConfig = { ...S.ghConfig, ...JSON.parse(stored) };
+  // Always fill in defaults for owner/repo/branch
+  if (!S.ghConfig.owner)  S.ghConfig.owner  = DEFAULT_GH_OWNER;
+  if (!S.ghConfig.repo)   S.ghConfig.repo   = DEFAULT_GH_REPO;
+  if (!S.ghConfig.branch) S.ghConfig.branch = DEFAULT_GH_BRANCH;
 
   // Load properties & testimonials in parallel
   await Promise.all([loadProperties(), loadTestimonialsAdmin()]);
