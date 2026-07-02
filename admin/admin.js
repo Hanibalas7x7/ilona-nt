@@ -463,7 +463,7 @@ async function saveToGitHub() {
     showStatusMsg(`❌ Klaida: ${err.message}`, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '💾 Išsaugoti į GitHub';
+    btn.textContent = '💾 Išsaugoti pakeitimus į serverį';
   }
 }
 
