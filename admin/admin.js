@@ -309,18 +309,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   }
 });
 
-document.getElementById('forgotPassLink').addEventListener('click', (e) => {
-  e.preventDefault();
-  localStorage.removeItem(PASS_KEY);
-  localStorage.removeItem(HASH_ON_GH_KEY);
-  document.getElementById('loginForm').classList.add('hidden');
-  document.getElementById('setupForm').classList.remove('hidden');
-  // Užpildome owner/repo jei jau žinome
-  const cfg = S.ghConfig;
-  if (cfg.owner) document.getElementById('setupOwner').value = cfg.owner;
-  if (cfg.repo)  document.getElementById('setupRepo').value  = cfg.repo;
-});
-
 function doLogout() {
   if (!S.unsaved || confirm('Yra neišsaugotų pakeitimų. Atsijungti?')) {
     sessionStorage.removeItem('ntilona_session');
