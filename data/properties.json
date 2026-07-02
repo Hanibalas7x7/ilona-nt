@@ -322,35 +322,5 @@
       "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=900&q=80",
       "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=900&q=80"
     ]
-  },
-  {
-    "id": 13,
-    "status": "active",
-    "type": "pirkti",
-    "category": "namas",
-    "title": "Skuodo namas",
-    "address": "Šatrijos g.",
-    "location": "Skuodas",
-    "price": "115 000 €",
-    "pricePerSqm": "958 €/m²",
-    "area": "120",
-    "rooms": "4",
-    "floor": "2 aukštai",
-    "year": "1998",
-    "heating": "Oras-Oras",
-    "energy": "B",
-    "condition": "Tvarkingas",
-    "equipment": "Pilnas įrengimas",
-    "desc": "Skuode brangiai",
-    "new": true,
-    "images": [
-      "images/obj13/1.jpg",
-      "images/obj13/2.jpg",
-      "images/obj13/3.jpg",
-      "images/obj13/4.jpg",
-      "images/obj13/5.jpg",
-      "images/obj13/6.jpg",
-      "images/obj13/7.jpg"
-    ]
   }
 ]
