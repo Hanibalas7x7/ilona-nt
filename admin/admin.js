@@ -656,7 +656,8 @@ function renderTable() {
 
   body.innerHTML = rows.map(p => {
     const status = p.status || 'active';
-    const thumb  = (p.images && p.images[0]) ? p.images[0].replace('w=900', 'w=120') : '';
+    const rawThumb = (p.images && p.images[0]) ? p.images[0] : '';
+    const thumb  = rawThumb ? (rawThumb.startsWith('http') ? rawThumb.replace('w=900','w=120') : '../' + rawThumb) : '';
     const catLT  = { butas: 'Butas', namas: 'Namas', sklypas: 'Sklypas', komercinis: 'Komercinis' };
 
     return `
@@ -716,7 +717,8 @@ function renderTable() {
   const catLT2 = { butas: 'Butas', namas: 'Namas', sklypas: 'Sklypas', komercinis: 'Komercinis' };
   cards.innerHTML = rows.map(p => {
     const status = p.status || 'active';
-    const thumb  = (p.images && p.images[0]) ? p.images[0].replace('w=900', 'w=200') : '';
+    const rawThumb2 = (p.images && p.images[0]) ? p.images[0] : '';
+    const thumb  = rawThumb2 ? (rawThumb2.startsWith('http') ? rawThumb2.replace('w=900','w=200') : '../' + rawThumb2) : '';
     const meta   = [esc(p.location || ''), esc(catLT2[p.category] || p.category), p.type === 'pirkti' ? 'Pardavimas' : 'Nuoma']
                     .filter(Boolean).join(' · ');
     return `
