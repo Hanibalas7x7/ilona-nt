@@ -564,9 +564,10 @@ function renderListings() {
     });
   }
 
-  const filtered = state.activeFilter === 'visi'
+  const filtered = (state.activeFilter === 'visi'
     ? pool
-    : pool.filter(p => p.category === state.activeFilter);
+    : pool.filter(p => p.category === state.activeFilter))
+    .slice().sort((a, b) => b.id - a.id); // naujausias ID pirmas
 
   const visible = filtered.slice(0, state.visibleCount);
 
