@@ -567,7 +567,12 @@ function renderListings() {
   const filtered = (state.activeFilter === 'visi'
     ? pool
     : pool.filter(p => p.category === state.activeFilter))
-    .slice().sort((a, b) => b.id - a.id); // naujausias ID pirmas
+    .slice().sort((a, b) => {
+      // new:true pirma, tada naujausias ID
+      if (b.new && !a.new) return 1;
+      if (a.new && !b.new) return -1;
+      return b.id - a.id;
+    });
 
   const visible = filtered.slice(0, state.visibleCount);
 
