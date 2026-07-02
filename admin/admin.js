@@ -294,16 +294,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   hideError(err);
   sessionStorage.setItem('ntilona_session', '1');
   await enterAdmin();
-  // Automatiškai nuskaitome token iš GitHub jei šiame įrenginyje jo nėra
-  if (!S.ghConfig.token) {
-    const enc = await fetchEncryptedToken();
-    if (enc) {
-      const tok = await decryptToken(pass, enc);
-      if (tok) {
-        S.ghConfig = { ...S.ghConfig, token: tok };
-        localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
-      }
+  // Token sinchronizacija su GitHub
+  const encOnGh = await fetchEncryptedToken();
+  if (!S.ghConfig.token && encOnGh) {
+    // Naujas įrenginys: iššifruojame ir įkeliame token
+    const tok = await decryptToken(pass, encOnGh);
+    if (tok) {
+      S.ghConfig = { ...S.ghConfig, token: tok };
+      localStorage.setItem(GH_KEY, JSON.stringify(S.ghConfig));
     }
+  } else if (S.ghConfig.token && !encOnGh) {
+    // Esamas įrenginys: pirmą kartą šifruojame ir saugome token į GitHub
+    saveTokenToGitHub(pass, S.ghConfig.token);
   }
 });
 
