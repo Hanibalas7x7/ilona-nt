@@ -1330,7 +1330,7 @@ function renderFormImages() {
   }
   list.innerHTML = formImages.map((img, i) => `
     <div class="img-thumb-wrap${img.uploading ? ' uploading' : ''}" data-idx="${i}">
-      <img src="${img.preview || esc(img.url)}" alt="nuotrauka ${i + 1}" />
+      <img src="${img.preview || (img.url ? '../' + img.url : '')}" alt="nuotrauka ${i + 1}" />
       ${img.uploading ? '<div class="img-spinner">⌛</div>' : ''}
       <button type="button" class="img-remove" data-idx="${i}" aria-label="Pašalinti">✕</button>
       <span class="img-num">${i + 1}</span>
@@ -1379,7 +1379,8 @@ async function uploadFileToGitHub(base64, path) {
       { headers: ghHeaders() }
     );
     if (check.ok) sha = (await check.json()).sha;
-  } catch { /* new file */ }
+    // 404 is expected for new files — no action needed
+  } catch { /* network error */ }
 
   const res = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
@@ -1425,7 +1426,7 @@ async function handleImageFiles(files) {
         statusEl.textContent = `Įkeliama į GitHub ${i + 1}/${files.length}...`;
         const b64 = await blobToBase64(blob);
         await uploadFileToGitHub(b64, path);
-        formImages[idx] = { url: path, uploading: false };
+        formImages[idx] = { url: path, preview: formImages[idx].preview, uploading: false };
       } catch (err) {
         formImages[idx].uploading = false;
         showStatusMsg(`❌ Klaida įkeliant ${fileName}: ${err.message}`, 'error');
